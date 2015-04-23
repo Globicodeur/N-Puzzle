@@ -1,11 +1,11 @@
 #include "Application.hpp"
 
-#include "options/program_options.hpp"
+#include "options/Options.hpp"
 
 Application::Application(int argc, char **argv) {
-    options::parseFromCommandLine(argc, argv);
+    Options::parseFromCommandLine(argc, argv);
 }
 
 void Application::run(void) {
-
+    std::cout << "Starting with: " << Options::inputFile << std::endl;
 }
