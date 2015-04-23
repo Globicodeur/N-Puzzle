@@ -3,16 +3,23 @@ NAME			=	n-puzzle
 rwildcard		=	$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2)\
 					$(filter $(subst *,%,$2),$d))
 
-COMPILER		=	g++-5
+COMPILER		=	clang++
 
 PCH				=	srcs/stdafx.hpp
 PCH_SUFFIX		=	.gch
 PCH_DIR			=	/tmp/pch_$(NAME)
 PCH_TARGET		=	$(PCH_DIR)$(PCH_SUFFIX)/pch
 PCH_FLAG		=	-include $(PCH_DIR)
+PCH_IGN_FLAGS	=	-Wno-deprecated-declarations
 
-CFLAGS			=	-Wall -Wextra -Werror -std=c++1y -O3
-LFLAGS			=
+INCLUDE_DIRS	=	$(HOME)/.brew/Cellar/boost/1.57.0/include
+LIB_DIRS		=	$(HOME)/.brew/Cellar/boost/1.57.0/lib
+LIB_NAMES		=	boost_program_options
+
+CFLAGS			=	-Wall -Wextra -Werror -std=c++1y -O3\
+					$(foreach dir, $(INCLUDE_DIRS), -I $(dir))
+LFLAGS			=	$(foreach dir, $(LIB_DIRS), -L $(dir))\
+					$(foreach name, $(LIB_NAMES), -l$(name))
 
 OBJ_DIR			=	objs
 SRCS			=	$(call rwildcard, ./srcs, *.cpp)
@@ -30,7 +37,7 @@ $(NAME): $(OBJS)
 $(PCH_TARGET): $(PCH)
 	@mkdir -p $(PCH_DIR)$(PCH_SUFFIX)
 	@echo "$(bold)$(cyan)precompiling	$(white)$<$(reset)"
-	@$(COMPILER) $(CFLAGS) $< -o $@
+	@$(COMPILER) $(CFLAGS) $(PCH_IGN_FLAGS) $< -o $@
 
 $(OBJS): | $(OBJ_DIR)
 
