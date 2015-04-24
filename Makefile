@@ -36,7 +36,7 @@ $(NAME): $(OBJS)
 
 $(PCH_TARGET): $(PCH)
 	@mkdir -p $(PCH_DIR)$(PCH_SUFFIX)
-	@echo "$(bold)$(cyan)precompiling	$(white)$<$(reset)"
+	@echo "$(bold)$(cyan)precompiling	$(reset)$(white)$(dir $<)$(bold)$(notdir $<)$(reset)"
 	@$(COMPILER) $(CFLAGS) $(PCH_IGN_FLAGS) $< -o $@
 
 $(OBJS): | $(OBJ_DIR)
@@ -45,7 +45,7 @@ $(OBJ_DIR):
 	@$(foreach dir, $(OBJ_SUB_DIRS), mkdir -p $(dir);)
 
 $(OBJ_DIR)/%.o: %.cpp $(PCH_TARGET)
-	@echo "$(bold)$(cyan)compiling	$(white)$<$(reset)"
+	@echo "$(bold)$(cyan)compiling	$(reset)$(white)$(dir $<)$(bold)$(notdir $<)$(reset)"
 	@$(COMPILER) $(CFLAGS) $(PCH_FLAG) -c $< -o $@
 
 depend: .depend
@@ -60,7 +60,7 @@ clean: show_fancy_name
 	@echo "$(bold)$(red)cleaning	$(white)$(OBJ_DIR)$(reset)"
 	@rm -rf $(OBJ_DIR)
 	@rm -f ./.depend
-	@echo "$(bold)$(red)clening		$(white)$(PCH_DIR)$(reset)"
+	@echo "$(bold)$(red)cleaning	$(white)$(PCH_DIR)$(reset)"
 	@rm -rf $(PCH_DIR)$(PCH_SUFFIX)
 
 fclean: clean
