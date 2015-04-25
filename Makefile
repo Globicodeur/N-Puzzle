@@ -12,7 +12,8 @@ PCH_TARGET		=	$(PCH_DIR)$(PCH_SUFFIX)/pch
 PCH_FLAG		=	-include $(PCH_DIR)
 PCH_IGN_FLAGS	=	-Wno-deprecated-declarations
 
-INCLUDE_DIRS	=	$(HOME)/.brew/Cellar/boost/1.57.0/include
+INCLUDE_DIRS	=	$(HOME)/.brew/Cellar/boost/1.57.0/include\
+					./srcs
 LIB_DIRS		=	$(HOME)/.brew/Cellar/boost/1.57.0/lib
 LIB_NAMES		=	boost_program_options
 
