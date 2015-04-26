@@ -17,7 +17,7 @@ void Application::run(void) {
     auto parsed = parser.parse(Options::inputFile);
     auto solution = solver.solve(parsed);
 
-    std::cout << solution << std::endl;
+    (void)solution;
     // using it = sp::istream_iterator;
     // std::ifstream ifs { Options::inputFile };
     // ifs.unsetf(std::ios::skipws);

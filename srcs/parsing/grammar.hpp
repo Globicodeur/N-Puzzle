@@ -1,10 +1,8 @@
 #pragma once
 
+#include "forwards.hpp"
+
 namespace parsing {
-
-    using namespace qi;
-
-    using ParsedPuzzle = std::vector<std::vector<uint>>;
 
     template <class It>
     struct PuzzleGrammar: grammar<It, ParsedPuzzle(), blank_type> {
