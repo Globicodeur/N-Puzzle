@@ -27,12 +27,13 @@ namespace algorithm {
 
     template <uint size>
     static auto buildGoal() {
-        static const std::pair<int, int> DELTAS[] = {
+        struct Position { int x, y; };
+        static const Position DELTAS[] = {
             { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 }
         };
         Puzzle<size> puzzle;
 
-        std::pair<int, int> pos { -1, 0 };
+        Position pos { -1, 0 };
         uint dx = size, dy = size - 1;
         uint value = 1;
         uint i = 0;
@@ -40,12 +41,12 @@ namespace algorithm {
 
         while (dx || dy) {
             auto delta = DELTAS[i % 4];
-            pos.first += delta.first;
-            pos.second += delta.second;
-            puzzle.grid[pos.second * size + pos.first] = (value++) % (size * size);
+            pos.x += delta.x;
+            pos.y += delta.y;
+            puzzle.grid[pos.y * size + pos.x] = (value++) % (size * size);
             ++moved;
-            if (delta.first && moved == dx)  { i++; moved = 0; --dx; }
-            if (delta.second && moved == dy) { i++; moved = 0; --dy; }
+            if (delta.x && moved == dx)  { i++; moved = 0; --dx; }
+            if (delta.y && moved == dy) { i++; moved = 0; --dy; }
         }
         return puzzle;
     }

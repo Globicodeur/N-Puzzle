@@ -10,7 +10,7 @@ PCH_SUFFIX		=	.gch
 PCH_DIR			=	/tmp/pch_$(NAME)
 PCH_TARGET		=	$(PCH_DIR)$(PCH_SUFFIX)/pch
 PCH_FLAG		=	-include $(PCH_DIR)
-PCH_IGN_FLAGS	=	-Wno-deprecated-declarations
+PCH_IGN_FLAGS	=	-Wno-deprecated-declarations -Wno-unused-parameter
 
 INCLUDE_DIRS	=	$(HOME)/.brew/Cellar/boost/1.57.0/include\
 					./srcs
