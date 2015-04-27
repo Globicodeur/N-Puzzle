@@ -1,14 +1,13 @@
 #pragma once
 
 #include "parsing/forwards.hpp"
+#include "puzzle/Solution.hpp"
 
 namespace algorithm {
 
-    struct Solution{};
-
     struct Solver {
 
-        Solution solve(const parsing::ParsedPuzzle &);
+        puzzle::Solution solve(const parsing::ParsedPuzzle &);
 
     };
 

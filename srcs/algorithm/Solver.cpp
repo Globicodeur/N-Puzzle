@@ -1,30 +1,86 @@
 #include "Solver.hpp"
 
+#include "astar.hpp"
+
+#include "exceptions.hpp"
+
+#include "puzzle/Puzzle.hpp"
+#include "puzzle/utilities.hpp"
+
 namespace algorithm {
 
-    static constexpr auto MAX_PUZZLE_SIZE = 16u;
+    using puzzle::Solution;
+    using puzzle::Puzzle;
 
-    struct PuzzleSizeTooLarge: public std::exception {
+    using parsing::ParsedPuzzle;
 
-        PuzzleSizeTooLarge(std::size_t size) {
-            std::ostringstream oss;
-            oss << "Solver error: The puzzle size ("
-                << size << ") is too large (maximum allowed: "
-                << MAX_PUZZLE_SIZE << ")";
-            what_ = oss.str();
+    template <uint size>
+    static auto buildStaticPuzzle(const ParsedPuzzle & parsed) {
+        Puzzle<size> puzzle;
+
+        for (uint y = 0; y < size; ++y)
+            for (uint x = 0; x < size; ++x)
+                puzzle.grid[y * size + x] = parsed.at(y).at(x);
+
+        return puzzle;
+    }
+
+    template <uint size>
+    static auto buildGoal() {
+        static const std::pair<int, int> DELTAS[] = {
+            { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 }
+        };
+        Puzzle<size> puzzle;
+
+        std::pair<int, int> pos { -1, 0 };
+        uint dx = size, dy = size - 1;
+        uint value = 1;
+        uint i = 0;
+        uint moved = 0;
+
+        while (dx || dy) {
+            auto delta = DELTAS[i % 4];
+            pos.first += delta.first;
+            pos.second += delta.second;
+            puzzle.grid[pos.second * size + pos.first] = (value++) % (size * size);
+            ++moved;
+            if (delta.first && moved == dx)  { i++; moved = 0; --dx; }
+            if (delta.second && moved == dy) { i++; moved = 0; --dy; }
+        }
+        return puzzle;
+    }
+
+    template <uint size>
+    static auto inversions(const Puzzle<size> & puzzle) {
+        uint count = 0;
+
+        for (uint i = 0; i < size * size - 1; ++i) {
+            if (puzzle.grid[i] == 0)
+                continue ;
+            for (uint j = i + 1; j < size * size; ++j)
+                count += (puzzle.grid[j] < puzzle.grid[i]);
         }
 
-        virtual const char * what() const noexcept {
-            return what_.c_str();
-        }
+        return count;
+    }
 
-    private:
-        std::string what_;
-    };
+    template <uint size>
+    static bool isSolvable(const Puzzle<size> & start, const Puzzle<size> & goal) {
+        return inversions(start) % 2 == inversions(goal) % 2;
+    }
 
-    template <uint i>
-    static auto solve(const parsing::ParsedPuzzle &) {
-        return Solution { };
+    template <uint size>
+    static auto solve(const ParsedPuzzle & parsed) {
+        auto start = buildStaticPuzzle<size>(parsed);
+        std::cout << start << std::endl;
+
+        auto goal = buildGoal<size>();
+        std::cout << goal << std::endl;
+
+        if (!isSolvable(start, goal))
+            throw error::PuzzleNotSolvable { };
+
+        return astar(start, goal);
     }
 
     // Runtime value unrolling
@@ -33,24 +89,26 @@ namespace algorithm {
     // This should allow some badass optimizations
     // (BTW, fuck clang 3.6 for still not supporting non type template parameter
     // packs)
-    template <uint i>
-    static std::enable_if_t<i == MAX_PUZZLE_SIZE, Solution>
-    findAndApplyStaticSolver(const parsing::ParsedPuzzle & parsed) {
-        if (parsed.size() != i)
-            throw PuzzleSizeTooLarge { parsed.size() };
-        return solve<i>(parsed);
+    template <uint size>
+    static std::enable_if_t<size == MAX_PUZZLE_SIZE, Solution>
+    findAndApplyStaticSolver(const ParsedPuzzle & parsed) {
+        if (parsed.size() != size)
+            throw error::PuzzleSizeTooLarge { parsed.size() };
+        return solve<size>(parsed);
     }
 
-    template <uint i>
-    static std::enable_if_t<i < MAX_PUZZLE_SIZE, Solution>
-    findAndApplyStaticSolver(const parsing::ParsedPuzzle & parsed) {
-        if (parsed.size() == i)
-            return solve<i>(parsed);
-        return findAndApplyStaticSolver<i + 1>(parsed);
+    template <uint size>
+    static std::enable_if_t<size < MAX_PUZZLE_SIZE, Solution>
+    findAndApplyStaticSolver(const ParsedPuzzle & parsed) {
+        if (parsed.size() == size)
+            return solve<size>(parsed);
+        return findAndApplyStaticSolver<size + 1>(parsed);
     }
 
-    Solution Solver::solve(const parsing::ParsedPuzzle & parsed) {
-        return findAndApplyStaticSolver<0>(parsed);
+    Solution Solver::solve(const ParsedPuzzle & parsed) {
+        if (parsed.size() == 0)
+            throw error::EmptyPuzzle { };
+        return findAndApplyStaticSolver<1>(parsed);
     }
 
 }
