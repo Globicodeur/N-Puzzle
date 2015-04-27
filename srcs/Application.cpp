@@ -14,17 +14,12 @@ void Application::run(void) {
     parsing::Parser parser;
     algorithm::Solver solver;
 
+    // Add configuration here
+
     auto parsed = parser.parse(Options::inputFile);
     auto solution = solver.solve(parsed);
 
     (void)solution;
-    // using it = sp::istream_iterator;
-    // std::ifstream ifs { Options::inputFile };
-    // ifs.unsetf(std::ios::skipws);
-    // it begin { ifs };
-    // it end;
-
-    // Puzzle<5> solution;
 
     // char sol[] = {
     //     1, 2 ,3 ,4 ,5,
