@@ -16,6 +16,7 @@
 
 // Aliases
 namespace po = boost::program_options;
-namespace sp = boost::spirit;
+
+namespace spirit = boost::spirit;
 namespace qi = boost::spirit::qi;
 namespace ph = boost::phoenix;
