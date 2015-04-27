@@ -4,7 +4,9 @@
 
 namespace parsing {
 
-    struct Parser {
+    class Parser {
+
+    public:
 
         ParsedPuzzle parse(const std::string & file);
 
