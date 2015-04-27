@@ -20,9 +20,14 @@ namespace puzzle {
     // Puzzle ostream overload
     template <uint size>
     std::ostream & operator<<(std::ostream & os, const Puzzle<size> & puzzle) {
+        static const int width = std::floor(std::log10(size * size - 1)) + 1;
+
         for (uint y = 0; y < size; ++y) {
+            os << '|';
             for (uint x = 0; x < size; ++x)
-                os << static_cast<uint>(puzzle.grid[y * size + x]) << " ";
+                os  << std::setw(width) << std::left
+                    << static_cast<uint>(puzzle.grid[y * size + x])
+                    << " |";
             os << std::endl;
         }
         return os;
