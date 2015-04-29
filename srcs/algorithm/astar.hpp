@@ -32,16 +32,6 @@ namespace algorithm {
         const Data *previous;
     };
 
-    struct NodeHasher {
-
-        template <class Data>
-        auto operator()(const Node<Data> & node) const {
-            static const puzzle::PuzzleHasher hasher { };
-            return hasher(node.data);
-        }
-
-    };
-
     template <uint size>
     static auto findNeighbors(const Puzzle<size> & puzzle) {
         std::vector<Puzzle<size>> neighbors;
@@ -101,19 +91,26 @@ namespace algorithm {
 
     template <uint size>
     Solution astar(const Puzzle<size> & start, const Puzzle<size> & goal) {
-        static const NodeHasher nodeHasher { };
-
         using NodeT = Node<Puzzle<size>>;
-        using ClosedSet = std::unordered_map<Puzzle<size>, const Puzzle<size> *, puzzle::PuzzleHasher>;
         using OpenSet = boost::heap::binomial_heap<NodeT>;
-        using Handles = std::unordered_map<size_t, typename OpenSet::handle_type>;
+        using ClosedSet = std::unordered_map<
+            Puzzle<size>,
+            const Puzzle<size> *,
+            puzzle::PuzzleHasher
+        >;
+        using Handles = std::unordered_map<
+            size_t,
+            typename OpenSet::handle_type
+        >;
+
+        static const puzzle::PuzzleHasher puzzleHasher { };
 
         ClosedSet closedSet;
         OpenSet openSet;
         Handles handles;
 
         auto handle = openSet.emplace(start, 0, dumbHeuristic(start, goal), nullptr);
-        handles.emplace(nodeHasher(*handle), handle);
+        handles.emplace(puzzleHasher(start), handle);
 
         while (!openSet.empty()) {
             auto current = openSet.top();
@@ -131,7 +128,7 @@ namespace algorithm {
                 auto possibleNewDist = current.distance + 1;
                 NodeT neighborNode { neighbor, possibleNewDist, possibleNewDist + dumbHeuristic(neighbor, goal), &inserted.first->first };
 
-                auto hash = nodeHasher(neighborNode);
+                auto hash = puzzleHasher(neighbor);
                 auto handleIt = handles.find(hash);
                 if (handleIt == handles.end() || possibleNewDist < (*handleIt->second).distance) {
                     if (handleIt == handles.end()) {
