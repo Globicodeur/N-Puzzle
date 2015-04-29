@@ -61,4 +61,57 @@ namespace puzzle {
         return puzzle;
     }
 
+    // Find immediate neighbors for a given puzzle
+    template <uint size>
+    auto neighbors(const Puzzle<size> & puzzle) {
+        std::vector<Puzzle<size>> neighbors;
+        neighbors.reserve(4);
+        auto idx = puzzle.indexOf(0);
+
+        auto addNeighbor = [&](int di) {
+            Puzzle<size> copy(puzzle);
+            std::swap(copy.grid[idx], copy.grid[idx + di]);
+            neighbors.push_back(copy);
+        };
+
+        if (idx >= 1)                     addNeighbor(-1);
+        if (idx < size * size - 1)        addNeighbor(1);
+        if (idx >= size)                  addNeighbor(-size);
+        if (idx < size * size - size - 1) addNeighbor(size);
+
+        return neighbors;
+    }
+
+    // Computes the number of inversions for a given puzzle
+    template <uint size>
+    auto inversions(const Puzzle<size> & puzzle) {
+        uint count = 0;
+
+        for (uint i = 0; i < size * size - 1; ++i) {
+            if (puzzle.grid[i] == 0)
+                continue ;
+            for (uint j = i + 1; j < size * size; ++j) {
+                if (puzzle.grid[j] == 0)
+                    continue ;
+                count += (puzzle.grid[j] < puzzle.grid[i]);
+            }
+        }
+
+        return count;
+    }
+
+    // Returns true if `start` belongs to the same permutation group as `goal`
+    template <uint size>
+    bool isSolvable(const Puzzle<size> & start, const Puzzle<size> & goal) {
+        auto startInversions = inversions(start);
+        auto goalInversions = inversions(goal);
+
+        if (size % 2 == 0) {
+            startInversions += start.indexOf(0) / size;
+            goalInversions += goal.indexOf(0) / size;
+        }
+
+        return startInversions % 2 == goalInversions % 2;
+    }
+
 }
