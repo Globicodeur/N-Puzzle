@@ -34,31 +34,6 @@ namespace puzzle {
             return std::distance(grid, std::find(grid, grid + gridSize, val));
         }
 
-        // void computeCost(const Puzzle &) {
-        //     cost = 0;
-        //     // GG
-        //     // for (uint i = 0; i < size_ * size_; ++i) {
-        //     //     if (data_[i] == goal.data_[i])
-        //     //         cost--;
-        //     // }
-        //     //
-        //     // Manhattan distance
-
-        //     static const uint IDXS[] = {
-        //         12, 0, 1, 2, 3, 4, 9, 14, 19, 24, 23, 22, 21,
-        //         20, 15, 10, 5, 6, 7, 8, 13, 18, 17, 16, 11
-        //     };
-        //     for (uint i = 0; i < size * size; ++i) {
-        //         uint goalIdx = IDXS[static_cast<short>(grid[i])];
-        //         uint goalX = goalIdx % size;
-        //         uint goalY = goalIdx / size;
-        //         uint x = i % size;
-        //         uint y = i / size;
-        //         int dx = x - goalX;
-        //         int dy = y - goalY;
-        //         cost += dx * dx + dy * dy;
-        //     }
-        // }
     };
 
 }
