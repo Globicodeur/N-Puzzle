@@ -58,8 +58,11 @@ namespace algorithm {
         for (uint i = 0; i < size * size - 1; ++i) {
             if (puzzle.grid[i] == 0)
                 continue ;
-            for (uint j = i + 1; j < size * size; ++j)
+            for (uint j = i + 1; j < size * size; ++j) {
+                if (puzzle.grid[j] == 0)
+                    continue ;
                 count += (puzzle.grid[j] < puzzle.grid[i]);
+            }
         }
 
         return count;
@@ -67,7 +70,13 @@ namespace algorithm {
 
     template <uint size>
     static bool isSolvable(const Puzzle<size> & start, const Puzzle<size> & goal) {
-        return inversions(start) % 2 == inversions(goal) % 2;
+        auto startInversions = inversions(start);
+        auto goalInversions = inversions(goal);
+        if (size % 2 == 0) {
+            startInversions += start.indexOf(0) / size;
+            goalInversions += goal.indexOf(0) / size;
+        }
+        return startInversions % 2 == goalInversions % 2;
     }
 
     template <uint size>
