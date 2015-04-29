@@ -15,43 +15,6 @@ namespace algorithm {
     using parsing::ParsedPuzzle;
 
     template <uint size>
-    static auto buildStaticPuzzle(const ParsedPuzzle & parsed) {
-        Puzzle<size> puzzle;
-
-        for (uint y = 0; y < size; ++y)
-            for (uint x = 0; x < size; ++x)
-                puzzle.grid[y * size + x] = parsed.at(y).at(x);
-
-        return puzzle;
-    }
-
-    template <uint size>
-    static auto buildGoal() {
-        struct Position { int x, y; };
-        static const Position DELTAS[] = {
-            { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 }
-        };
-        Puzzle<size> puzzle;
-
-        Position pos { -1, 0 };
-        uint dx = size, dy = size - 1;
-        uint value = 1;
-        uint i = 0;
-        uint moved = 0;
-
-        while (dx || dy) {
-            auto delta = DELTAS[i % 4];
-            pos.x += delta.x;
-            pos.y += delta.y;
-            puzzle.grid[pos.y * size + pos.x] = (value++) % (size * size);
-            ++moved;
-            if (delta.x && moved == dx)  { i++; moved = 0; --dx; }
-            if (delta.y && moved == dy) { i++; moved = 0; --dy; }
-        }
-        return puzzle;
-    }
-
-    template <uint size>
     static auto inversions(const Puzzle<size> & puzzle) {
         uint count = 0;
 
@@ -80,11 +43,22 @@ namespace algorithm {
     }
 
     template <uint size>
+    static auto buildStaticPuzzle(const ParsedPuzzle & parsed) {
+        Puzzle<size> puzzle;
+
+        for (uint y = 0; y < size; ++y)
+            for (uint x = 0; x < size; ++x)
+                puzzle.grid[y * size + x] = parsed.at(y).at(x);
+
+        return puzzle;
+    }
+
+    template <uint size>
     static auto solve(const ParsedPuzzle & parsed) {
         auto start = buildStaticPuzzle<size>(parsed);
         std::cout << start << std::endl;
 
-        auto goal = buildGoal<size>();
+        auto goal = puzzle::makeSnail<size>();
         std::cout << goal << std::endl;
 
         if (!isSolvable(start, goal))

@@ -33,4 +33,32 @@ namespace puzzle {
         return os;
     }
 
+    // Build a 'snail' puzzle like the ones in the subject
+    template <uint size>
+    auto makeSnail(void) {
+        struct Position { int x, y; };
+        static const Position DELTAS[] = {
+            { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 }
+        };
+
+        Puzzle<size> puzzle;
+        Position pos { -1, 0 };
+        uint xMoves = size;
+        uint yMoves = size - 1;
+        uint value = 1;
+        uint deltaIdx = 0;
+        uint moved = 0;
+
+        while (xMoves || yMoves) {
+            Position delta = DELTAS[deltaIdx % 4];
+            pos.x += delta.x;
+            pos.y += delta.y;
+            puzzle.grid[pos.y * size + pos.x] = (value++) % (size * size);
+            ++moved;
+            if (delta.x && moved == xMoves) { deltaIdx++; moved = 0; --xMoves; }
+            if (delta.y && moved == yMoves) { deltaIdx++; moved = 0; --yMoves; }
+        }
+        return puzzle;
+    }
+
 }
