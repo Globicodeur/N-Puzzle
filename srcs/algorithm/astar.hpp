@@ -131,11 +131,12 @@ namespace algorithm {
                 auto possibleNewDist = current.distance + 1;
                 NodeT neighborNode { neighbor, possibleNewDist, possibleNewDist + dumbHeuristic(neighbor, goal), &inserted.first->first };
 
-                auto handleIt = handles.find(nodeHasher(neighborNode));
+                auto hash = nodeHasher(neighborNode);
+                auto handleIt = handles.find(hash);
                 if (handleIt == handles.end() || possibleNewDist < (*handleIt->second).distance) {
                     if (handleIt == handles.end()) {
                         auto handle = openSet.push(std::move(neighborNode));
-                        handles.emplace(nodeHasher(*handle), handle);
+                        handles.emplace(hash, handle);
                     }
                     else {
                         (*handleIt->second).distance = possibleNewDist;
