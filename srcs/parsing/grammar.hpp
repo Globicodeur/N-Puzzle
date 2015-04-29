@@ -8,9 +8,9 @@ namespace parsing {
     struct PuzzleGrammar: grammar<It, ParsedPuzzle(), blank_type> {
 
         PuzzleGrammar(): PuzzleGrammar::base_type(puzzle) {
-            using ph::bind;
-            using ph::push_back;
-            using ph::ref;
+            using phoenix::bind;
+            using phoenix::push_back;
+            using phoenix::ref;
 
             comment =
                     '#'
