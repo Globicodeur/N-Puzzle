@@ -46,10 +46,9 @@ namespace parsing {
             puzzle =
                     noise
                     // Parsing the puzzle size and storing it in `size`
-                >>  uint_[ref(size) = _1] >> (comment | eol)
-                >>  noise
+                >>  uint_[ref(size) = _1]
                     // Parsing `size` rows
-                >>  (repeat(ref(size))[row >> noise])[_val = _1]
+                >>  (repeat(ref(size))[noise >> row])[_val = _1]
                 >>  noise
             ;
         }
