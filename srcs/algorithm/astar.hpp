@@ -77,17 +77,17 @@ namespace algorithm {
     }
 
     template <uint size>
-    auto dumbHeuristic(const Puzzle<size> & start, const Puzzle<size> &) {
+    auto dumbHeuristic(const Puzzle<size> & start, const Puzzle<size> & goal) {
         // static const uint IDXS[] = {
         //     12, 0, 1, 2, 3, 4, 9, 14, 19, 24, 23, 22, 21,
         //     20, 15, 10, 5, 6, 7, 8, 13, 18, 17, 16, 11
         // };
-        static const uint IDXS[] = {
-            9, 0, 1, 2, 3, 7, 11, 15, 14, 13, 12, 8, 4, 5, 6, 10
-        };
+        // static const uint IDXS[] = {
+        //     9, 0, 1, 2, 3, 7, 11, 15, 14, 13, 12, 8, 4, 5, 6, 10
+        // };
         uint cost = 0;
         for (uint i = 0; i < size * size; ++i) {
-            auto goalIdx = IDXS[start.grid[i]];
+            auto goalIdx = goal.indexOf(start.grid[i]);
             int goalX = goalIdx % size;
             int goalY = goalIdx / size;
             int x = i % size;
@@ -96,6 +96,31 @@ namespace algorithm {
             int dy = y - goalY;
             cost += (dx * dx) + (dy * dy);
         }
+        for (uint i = 0; i < size; ++i) {
+            for (uint j = 1; j < size; ++j) {
+                auto tj = start.grid[(i * size) + j];
+                auto tk = start.grid[(i * size) + (j - 1)];
+                auto gj = goal.indexOf(tj);
+                auto gk = goal.indexOf(tk);
+                bool sameLine = (gj / size == gk / size == i);
+                bool conflict = (gj % size < gk % size);
+                if (sameLine && conflict)
+                    cost += 1;
+            }
+        }
+        for (uint i = 0; i < size * size; ++i) {
+            auto goalIdx = goal.indexOf(start.grid[i]);
+            auto goalX = goalIdx % size;
+            auto goalY = goalIdx / size;
+            auto x = i % size;
+            auto y = i / size;
+            cost += (goalX != x) + (goalY != y);
+        }
+        for (uint i = 0; i < size * size; ++i) {
+            auto goalIdx = goal.indexOf(start.grid[i]);
+            cost += goalIdx != i;
+        }
+        std::cout << cost << std::endl;
         return cost;
     }
 
