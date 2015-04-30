@@ -11,11 +11,19 @@ namespace algorithm {
 
     template<class Data> struct Node {
 
-        Node(const Data & data, uint distance, uint cost, const Data * previous):
+        static constexpr puzzle::PuzzleHasher hasher { };
+
+        Node(
+            const Data & data,
+            uint distance,
+            uint cost,
+            const Node * previous
+        ):
             data        (data),
             distance    { distance },
             cost        { cost },
-            previous    { previous }
+            previous    { previous },
+            hash        { hasher(data) }
         { }
 
         bool operator<(const Node & other) const {
@@ -26,27 +34,33 @@ namespace algorithm {
             return data == other.data;
         }
 
+        struct Hasher {
+
+            auto operator()(const Node & node) const {
+                return node.hash;
+            }
+
+        };
+
         Data        data;
         uint        distance; // g
         uint        cost;     // f
-        const Data  *previous;
+        const Node  *previous;
+        std::size_t hash;
     };
 
     template <template <uint> class H, uint size>
     Solution astar(const Puzzle<size> & start, const Puzzle<size> & goal) {
+        // Type aliases
         using NodeT = Node<Puzzle<size>>;
-        using OpenSet = boost::heap::binomial_heap<NodeT>;
-        using ClosedSet = std::unordered_map<
-            Puzzle<size>,
-            const Puzzle<size> *,
-            puzzle::PuzzleHasher
-        >;
+        using OpenSet = boost::heap::fibonacci_heap<NodeT>;
+        using ClosedSet = std::unordered_set<NodeT, typename NodeT::Hasher>;
         using Handles = std::unordered_map<
             size_t,
             typename OpenSet::handle_type
         >;
+        //
 
-        static const puzzle::PuzzleHasher puzzleHasher { };
         const H<size> h { goal };
 
         ClosedSet closedSet;
@@ -54,39 +68,41 @@ namespace algorithm {
         Handles handles;
 
         auto handle = openSet.emplace(start, 0, h(start), nullptr);
-        handles.emplace(puzzleHasher(start), handle);
+        handles.emplace((*handle).hash, handle);
 
         while (!openSet.empty()) {
-            auto current = openSet.top();
+            auto & current = openSet.top();
             if (current.data == goal) {
+                std::cout << "GG\n";
                 // TODO: reconstruct path (i.e. build Solution)
                 return { };
             }
 
-            openSet.pop();
-            auto inserted = closedSet.emplace(current.data, current.previous);
-            for (const auto & neighbor: puzzle::neighbors(current.data)) {
-                if (closedSet.count(neighbor))
-                    continue ;
+            handles.erase(current.hash);
 
-                auto newDistance = current.distance + 1;
+            auto neighbors = puzzle::neighbors(current.data);
+            auto newDistance = current.distance + 1;
+            auto inserted = closedSet.insert(std::move(current));
+
+            openSet.pop();
+            for (const auto & neighbor: neighbors) {
                 NodeT neighborNode {
                     neighbor,
                     newDistance,
                     newDistance + h(neighbor),
-                    &inserted.first->first // <it<Puzzle, Puzzle *>, bool>
+                    &(*inserted.first) // <it<Node>, bool>
                 };
 
-                auto hash = puzzleHasher(neighbor);
-                auto handleIt = handles.find(hash);
+                if (closedSet.count(neighborNode))
+                    continue ;
+
+                auto handleIt = handles.find(neighborNode.hash);
                 if (handleIt == handles.end()) {
                     auto handle = openSet.push(neighborNode);
-                    handles.emplace(hash, handle);
+                    handles.emplace(neighborNode.hash, handle);
                 }
-                else if (newDistance < (*handleIt->second).distance) {
-                    (*handleIt->second).distance = newDistance;
+                else if (newDistance < (*handleIt->second).distance)
                     openSet.decrease(handleIt->second, neighborNode);
-                }
             }
 
         }
