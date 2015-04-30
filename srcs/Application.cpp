@@ -5,21 +5,30 @@
 
 #include "algorithm/Solver.hpp"
 #include "algorithm/heuristics.hpp"
+#include "algorithm/heuristic_composition.hpp"
 
 Application::Application(int argc, char **argv) {
     Options::parseFromCommandLine(argc, argv);
 }
 
+template <uint size>
+using Heuristics = algorithm::heuristics::Composition<
+    // algorithm::heuristics::MisplacedRowsAndColumns,
+    algorithm::heuristics::ManhattanDistance,
+    // algorithm::heuristics::LinearConflict
+>::Composer<size>;
+
 void Application::run(void) {
     std::cout << "Starting with: " << Options::inputFile << std::endl;
 
     parsing::Parser parser;
-    algorithm::Solver<algorithm::heuristics::ManhattanDistance> solver;
+    auto initialState = parser.parse(Options::inputFile);
 
-    // Add configuration here
+    algorithm::Solver<Heuristics> solver;
 
-    auto parsed = parser.parse(Options::inputFile);
-    auto solution = solver.solve(parsed);
+    auto showResults = [](const auto & solution) {
+        std::cout << solution << std::endl;
+    };
 
-    (void)solution;
+    solver.solve(initialState, showResults);
 }

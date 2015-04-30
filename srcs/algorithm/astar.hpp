@@ -49,8 +49,23 @@ namespace algorithm {
         std::size_t hash;
     };
 
+    template <uint size>
+    auto backTrack(std::size_t iterations, std::size_t visitedCount,
+                   const Node<Puzzle<size>> & lastNode) {
+        Solution<size> solution { iterations, visitedCount };
+        auto nodePtr = &lastNode;
+
+        do {
+            solution.push_back(nodePtr->data);
+            nodePtr = nodePtr->previous;
+        } while (nodePtr);
+
+        std::reverse(solution.begin(), solution.end());
+        return solution;
+    }
+
     template <template <uint> class H, uint size>
-    Solution astar(const Puzzle<size> & start, const Puzzle<size> & goal) {
+    auto astar(const Puzzle<size> & start, const Puzzle<size> & goal) {
         // Type aliases
         using NodeT = Node<Puzzle<size>>;
         using OpenSet = boost::heap::fibonacci_heap<NodeT>;
@@ -66,17 +81,15 @@ namespace algorithm {
         ClosedSet closedSet;
         OpenSet openSet;
         Handles handles;
+        std::size_t i = 1;
 
         auto handle = openSet.emplace(start, 0, h(start), nullptr);
         handles.emplace((*handle).hash, handle);
 
         while (!openSet.empty()) {
             auto & current = openSet.top();
-            if (current.data == goal) {
-                std::cout << "GG\n";
-                // TODO: reconstruct path (i.e. build Solution)
-                return { };
-            }
+            if (current.data == goal)
+                return backTrack(closedSet.size() + 1, i, current);
 
             handles.erase(current.hash);
 
@@ -90,7 +103,7 @@ namespace algorithm {
                     neighbor,
                     newDistance,
                     newDistance + h(neighbor),
-                    &(*inserted.first) // <it<Node>, bool>
+                    &(*inserted.first) // <iterator<NodeT>, bool>
                 };
 
                 if (closedSet.count(neighborNode))
@@ -100,6 +113,7 @@ namespace algorithm {
                 if (handleIt == handles.end()) {
                     auto handle = openSet.push(neighborNode);
                     handles.emplace(neighborNode.hash, handle);
+                    ++i;
                 }
                 else if (newDistance < (*handleIt->second).distance)
                     openSet.decrease(handleIt->second, neighborNode);
@@ -107,7 +121,7 @@ namespace algorithm {
 
         }
         // We should never reach here if we passed the solvability test
-        return { };
+        throw error::PuzzleNotSolvable { };
     }
 
 }

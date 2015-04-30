@@ -12,10 +12,11 @@ namespace algorithm {
     template <template <uint> class Heuristic>
     struct Solver {
 
-        puzzle::Solution solve(const ParsedPuzzle & parsed) {
+        template <class F>
+        void solve(const ParsedPuzzle & parsed, F onSolved) {
             if (parsed.size() == 0)
                 throw error::EmptyPuzzle { };
-            return findAndApplyStaticSolver<1>(parsed);
+            findAndApplyStaticSolver<1>(parsed, onSolved);
         }
 
     private:
@@ -26,24 +27,24 @@ namespace algorithm {
         // This should allow some badass optimizations
         // (BTW, fuck clang 3.6 for still not supporting non type template
         // parameter packs)
-        template <uint size>
-        static std::enable_if_t<size == MAX_PUZZLE_SIZE, puzzle::Solution>
-        findAndApplyStaticSolver(const ParsedPuzzle & parsed) {
+        template <uint size, class F>
+        static std::enable_if_t<size == MAX_PUZZLE_SIZE>
+        findAndApplyStaticSolver(const ParsedPuzzle & parsed, F onSolved) {
             if (parsed.size() != size)
                 throw error::PuzzleSizeTooLarge { parsed.size() };
-            return solve<size>(parsed);
+            solve<size>(parsed, onSolved);
         }
 
-        template <uint size>
-        static std::enable_if_t<size < MAX_PUZZLE_SIZE, puzzle::Solution>
-        findAndApplyStaticSolver(const ParsedPuzzle & parsed) {
+        template <uint size, class F>
+        static std::enable_if_t<size < MAX_PUZZLE_SIZE>
+        findAndApplyStaticSolver(const ParsedPuzzle & parsed, F onSolved) {
             if (parsed.size() == size)
-                return solve<size>(parsed);
-            return findAndApplyStaticSolver<size + 1>(parsed);
+                return solve<size>(parsed, onSolved);
+            return findAndApplyStaticSolver<size + 1>(parsed, onSolved);
         }
 
-        template <uint size>
-        static auto solve(const ParsedPuzzle & parsed) {
+        template <uint size, class F>
+        static void solve(const ParsedPuzzle & parsed, F onSolved) {
             auto start = buildStaticPuzzle<size>(parsed);
             std::cout << start << std::endl;
 
@@ -53,7 +54,7 @@ namespace algorithm {
             if (!isSolvable(start, goal))
                 throw error::PuzzleNotSolvable { };
 
-            return astar<Heuristic>(start, goal);
+            onSolved(astar<Heuristic>(start, goal));
         }
 
         // Builds a puzzle of known size from nested vectors of values
