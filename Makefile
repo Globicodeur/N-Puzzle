@@ -10,9 +10,10 @@ PCH_SUFFIX		=	.gch
 PCH_DIR			=	/tmp/pch_$(NAME)
 PCH_TARGET		=	$(PCH_DIR)$(PCH_SUFFIX)/pch
 PCH_FLAG		=	-include $(PCH_DIR)
-PCH_IGN_FLAGS	=	-Wno-deprecated-declarations
+PCH_IGN_FLAGS	=	-Wno-deprecated-declarations -Wno-unused-parameter
 
-INCLUDE_DIRS	=	$(HOME)/.brew/Cellar/boost/1.57.0/include
+INCLUDE_DIRS	=	$(HOME)/.brew/Cellar/boost/1.57.0/include\
+					./srcs
 LIB_DIRS		=	$(HOME)/.brew/Cellar/boost/1.57.0/lib
 LIB_NAMES		=	boost_program_options
 
@@ -36,7 +37,7 @@ $(NAME): $(OBJS)
 
 $(PCH_TARGET): $(PCH)
 	@mkdir -p $(PCH_DIR)$(PCH_SUFFIX)
-	@echo "$(bold)$(cyan)precompiling	$(white)$<$(reset)"
+	@echo "$(bold)$(cyan)precompiling	$(reset)$(white)$(dir $<)$(bold)$(notdir $<)$(reset)"
 	@$(COMPILER) $(CFLAGS) $(PCH_IGN_FLAGS) $< -o $@
 
 $(OBJS): | $(OBJ_DIR)
@@ -45,7 +46,7 @@ $(OBJ_DIR):
 	@$(foreach dir, $(OBJ_SUB_DIRS), mkdir -p $(dir);)
 
 $(OBJ_DIR)/%.o: %.cpp $(PCH_TARGET)
-	@echo "$(bold)$(cyan)compiling	$(white)$<$(reset)"
+	@echo "$(bold)$(cyan)compiling	$(reset)$(white)$(dir $<)$(bold)$(notdir $<)$(reset)"
 	@$(COMPILER) $(CFLAGS) $(PCH_FLAG) -c $< -o $@
 
 depend: .depend
@@ -60,7 +61,7 @@ clean: show_fancy_name
 	@echo "$(bold)$(red)cleaning	$(white)$(OBJ_DIR)$(reset)"
 	@rm -rf $(OBJ_DIR)
 	@rm -f ./.depend
-	@echo "$(bold)$(red)clening		$(white)$(PCH_DIR)$(reset)"
+	@echo "$(bold)$(red)cleaning	$(white)$(PCH_DIR)$(reset)"
 	@rm -rf $(PCH_DIR)$(PCH_SUFFIX)
 
 fclean: clean
