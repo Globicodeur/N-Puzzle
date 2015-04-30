@@ -14,7 +14,7 @@ Application::Application(int argc, char **argv) {
 template <uint size>
 using Heuristics = algorithm::heuristics::Composition<
     // algorithm::heuristics::MisplacedRowsAndColumns,
-    algorithm::heuristics::ManhattanDistance,
+    algorithm::heuristics::ManhattanDistance
     // algorithm::heuristics::LinearConflict
 >::Composer<size>;
 
