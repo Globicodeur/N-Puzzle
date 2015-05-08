@@ -20,7 +20,7 @@ namespace parsing {
 
     template <class It>
     static ParsedPuzzle parsePuzzle(It begin, It end) {
-        static const PuzzleGrammar<It> grammar;
+        const PuzzleGrammar<It> grammar;
         ParsedPuzzle puzzle;
 
         bool parseOk = qi::phrase_parse(begin, end, grammar, qi::blank, puzzle);
