@@ -29,7 +29,7 @@ namespace algorithm {
                     int dx = x - gx;
                     int dy = y - gy;
 
-                    cost += abs(dx) + abs(dy);
+                    cost += std::abs(dx) + std::abs(dy);
                 }
 
                 return cost;
