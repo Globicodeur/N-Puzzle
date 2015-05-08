@@ -40,6 +40,24 @@ namespace algorithm {
 
         };
 
+        struct GoalSizeMismatch: public std::exception {
+
+            GoalSizeMismatch(std::size_t goalSize, std::size_t initialSize) {
+                std::ostringstream oss;
+                oss << "Solver error: the goal size ("
+                    << goalSize << ") does not match the initial state size ("
+                    << initialSize << ")";
+                what_ = oss.str();
+            }
+
+            virtual const char * what() const noexcept {
+                return what_.c_str();
+            }
+
+        private:
+            std::string what_;
+        };
+
     }
 
 }

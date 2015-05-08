@@ -5,6 +5,8 @@
 #include "exceptions.hpp"
 #include "astar.hpp"
 
+#include "tools/Benchmark.hpp"
+
 namespace algorithm {
 
     using parsing::ParsedPuzzle;
@@ -13,10 +15,12 @@ namespace algorithm {
     struct Solver {
 
         template <class F>
-        void solve(const ParsedPuzzle & parsed, F onSolved) {
+        void solve(const ParsedPuzzle & parsed,
+                   boost::optional<ParsedPuzzle> goal,
+                   F onSolved) {
             if (parsed.size() == 0)
                 throw error::EmptyPuzzle { };
-            findAndApplyStaticSolver<1>(parsed, onSolved);
+            findAndApplyStaticSolver<1>(parsed, goal, onSolved);
         }
 
     private:
@@ -29,32 +33,48 @@ namespace algorithm {
         // parameter packs)
         template <uint size, class F>
         static std::enable_if_t<size == MAX_PUZZLE_SIZE>
-        findAndApplyStaticSolver(const ParsedPuzzle & parsed, F onSolved) {
+        findAndApplyStaticSolver(const ParsedPuzzle & parsed,
+                                 boost::optional<ParsedPuzzle> goal,
+                                 F onSolved) {
             if (parsed.size() != size)
                 throw error::PuzzleSizeTooLarge { parsed.size() };
-            solve<size>(parsed, onSolved);
+            solve<size>(parsed, goal, onSolved);
         }
 
         template <uint size, class F>
         static std::enable_if_t<size < MAX_PUZZLE_SIZE>
-        findAndApplyStaticSolver(const ParsedPuzzle & parsed, F onSolved) {
+        findAndApplyStaticSolver(const ParsedPuzzle & parsed,
+                                 boost::optional<ParsedPuzzle> goal,
+                                 F onSolved) {
             if (parsed.size() == size)
-                return solve<size>(parsed, onSolved);
-            return findAndApplyStaticSolver<size + 1>(parsed, onSolved);
+                return solve<size>(parsed, goal, onSolved);
+            return findAndApplyStaticSolver<size + 1>(parsed, goal, onSolved);
         }
 
         template <uint size, class F>
-        static void solve(const ParsedPuzzle & parsed, F onSolved) {
-            auto start = buildStaticPuzzle<size>(parsed);
-            std::cout << start << std::endl;
+        static void solve(const ParsedPuzzle & parsed,
+                          boost::optional<ParsedPuzzle> goal,
+                          F onSolved) {
+            Puzzle<size> start, end;
 
-            auto goal = puzzle::makeSnail<size>();
-            std::cout << goal << std::endl;
+            start = buildStaticPuzzle<size>(parsed);
+            if (goal) {
+                if (goal->size() != size)
+                    throw error::GoalSizeMismatch { goal->size(), size };
+                end = buildStaticPuzzle<size>(*goal);
+            }
+            else
+                end = puzzle::makeSnail<size>();
 
-            if (!isSolvable(start, goal))
+            std::cout << "Initial state:\n\n" << start << "\n\n";
+            std::cout << "Final state:\n\n" << end << "\n";
+            std::cout << "==============\n" << std::endl;
+
+            if (!isSolvable(start, end))
                 throw error::PuzzleNotSolvable { };
 
-            onSolved(astar<Heuristic>(start, goal));
+            tools::Benchmark bench { "Computation time" };
+            onSolved(astar<Heuristic>(start, end));
         }
 
         // Builds a puzzle of known size from nested vectors of values
