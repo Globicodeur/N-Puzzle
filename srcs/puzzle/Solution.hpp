@@ -20,7 +20,7 @@ namespace puzzle {
                 os << puzzle << "\n";
             os  << "A* iterations: " << solution.timeComplexity << "\n"
                 << "Total number of states visited: " << solution.spaceComplexity << "\n"
-                << "Number of moves required: " << solution.size() << "\n";
+                << "Number of moves required: " << solution.size() - 1 << "\n";
             return os;
         }
     };
