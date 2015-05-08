@@ -18,6 +18,8 @@
 #include <boost/spirit/include/phoenix.hpp>
 #include <boost/spirit/include/support_istream_iterator.hpp>
 
+#include <boost/mpl/set.hpp>
+
 // Aliases
 namespace po = boost::program_options;
 
