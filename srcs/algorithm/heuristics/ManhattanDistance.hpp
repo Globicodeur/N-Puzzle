@@ -29,7 +29,7 @@ namespace algorithm {
                     int dx = x - gx;
                     int dy = y - gy;
 
-                    cost += (dx * dx) + (dy * dy);
+                    cost += abs(dx) + abs(dy);
                 }
 
                 return cost;
