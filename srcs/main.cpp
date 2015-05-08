@@ -1,6 +1,10 @@
 #include "Application.hpp"
 
+#include "tools/locale.hpp"
+
 int main(int argc, char **argv) {
+
+    std::cout.imbue(tools::GroupNumbersLocale);
 
     Application app { argc, argv };
 
