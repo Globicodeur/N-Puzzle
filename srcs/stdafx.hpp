@@ -26,3 +26,7 @@ namespace po = boost::program_options;
 namespace phoenix = boost::phoenix;
 namespace spirit = boost::spirit;
 namespace qi = boost::spirit::qi;
+
+// Macros
+#define Constant static const auto
+#define HClass template <uint> class
