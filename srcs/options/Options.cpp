@@ -1,15 +1,22 @@
 #include "Options.hpp"
 
-std::string Options::inputFile { };
+std::string                 Options::initialFile { };
+std::string                 Options::goalFile { };
+std::vector<std::string>    Options::heuristics { "manhattan" };
 
 static auto getUsage(void) {
     po::options_description usage { "Available options" };
 
     usage.add_options()
-        ("help,h",  "Show this help message")
-        ("file,f",  po::value(&Options::inputFile)
-                        ->required(),
-                    "Input file")
+        ("help,h",      "Show this help message")
+        ("initial,i",   po::value(&Options::initialFile)
+                            ->required(),
+                        "Input file for the initial state")
+        ("goal,g",      po::value(&Options::goalFile),
+                        "Input file for the goal state")
+        ("heuristics",  po::value(&Options::heuristics)
+                            ->multitoken(),
+                        "Heuristics used for solving the puzzle")
     ;
 
     return usage;
@@ -18,7 +25,8 @@ static auto getUsage(void) {
 static auto getPositional(void) {
     po::positional_options_description usage;
 
-    usage.add("file", 1);
+    usage.add("initial", 1);
+    usage.add("goal", 1);
 
     return usage;
 }
