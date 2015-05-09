@@ -71,7 +71,7 @@ namespace algorithm {
         using OpenSet = boost::heap::fibonacci_heap<NodeT>;
         using ClosedSet = std::unordered_set<NodeT, typename NodeT::Hasher>;
         using Handles = std::unordered_map<
-            size_t,
+            std::size_t,
             typename OpenSet::handle_type
         >;
         //
