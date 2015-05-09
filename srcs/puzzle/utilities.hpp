@@ -74,10 +74,10 @@ namespace puzzle {
             neighbors.push_back(copy);
         };
 
-        if (idx >= 1)                     addNeighbor(-1);
-        if (idx < size * size - 1)        addNeighbor(1);
-        if (idx >= size)                  addNeighbor(-size);
-        if (idx < size * size - size - 1) addNeighbor(size);
+        if (idx % size > 0)         addNeighbor(-1);
+        if (idx % size < size - 1)  addNeighbor(1);
+        if (idx / size > 0)         addNeighbor(-size);
+        if (idx / size < size - 1)  addNeighbor(size);
 
         return neighbors;
     }
