@@ -23,26 +23,22 @@ std::enable_if_t<h_i != HEURISTICS_COUNT - 1>
 addHeuristic(Initial, Goal);
 //
 
-template <HClass... Heuristics>
-void solve(Initial initial, Goal goal, std::tuple<tools::Wrapper<Heuristics>...>) {
-    using SolverT = algorithm::Solver<
-        algorithm::heuristics::Composition<
-            Heuristics...
-        >::template Composer
-    >;
+template <HClass... Hs>
+void solve(Initial initial, Goal goal, std::tuple<tools::Wrapper<Hs>...>) {
+    using Heuristics = algorithm::heuristics::Composition<Hs...>;
+    using SolverT = algorithm::Solver<Heuristics::template Composer>;
 
     SolverT solver;
 
-    auto showResults = [](const auto & solution) {
+    solver.solve(initial, goal, [](const auto & solution) {
         std::cout << solution << std::endl;
-    };
-    solver.solve(initial, goal, showResults);
+    });
 }
 
 template <std::size_t i, class Set>
 std::enable_if_t<(i > HEURISTICS_COUNT)>
 solveWithHeuristics(Initial, Goal) {
-    throw std::out_of_range { "Too many heuristics" };
+    throw std::out_of_range { "Too many heuristics given" };
 }
 
 template <std::size_t i, class Set>
@@ -64,13 +60,13 @@ solveWithHeuristics(Initial initial, Goal goal) {
 
 template <std::size_t opt_i, std::size_t h_i, class Set>
 bool optionMatch(Initial initial, Goal goal) {
+    using Heuristic = algorithm::heuristics::HeuristicAt<h_i>;
     using NewSet = typename boost::mpl::insert<
         Set,
-        tools::Wrapper<algorithm::heuristics::HeuristicAt<h_i>::template type>
+        tools::Wrapper<Heuristic::template type>
     >::type;
 
-    if (algorithm::heuristics::HeuristicAt<h_i>::name ==
-        Options::heuristics.at(opt_i)) {
+    if (Heuristic::name == Options::heuristics.at(opt_i)) {
         solveWithHeuristics<opt_i + 1, NewSet>(initial, goal);
         return true;
     }
@@ -81,7 +77,7 @@ template <std::size_t opt_i, std::size_t h_i, class Set>
 std::enable_if_t<h_i == HEURISTICS_COUNT - 1>
 addHeuristic(Initial initial, Goal goal) {
     if (!optionMatch<opt_i, h_i, Set>(initial, goal))
-        throw std::out_of_range { "Unknown heuristic" };
+        throw Application::UnknownHeuristic { Options::heuristics.at(opt_i) };
 }
 
 template <std::size_t opt_i, std::size_t h_i, class Set>
