@@ -18,6 +18,8 @@ namespace algorithm {
                 uint cost = 0;
 
                 for (uint i = 0; i < size * size; ++i) {
+                    if (puzzle.grid[i] == 0)
+                        continue ;
                     uint gi = indexes[puzzle.grid[i]];
 
                     int gx = gi % size;
