@@ -9,7 +9,7 @@ namespace algorithm {
 
     namespace heuristics {
 
-        template <const char * n, template <uint> class H>
+        template <const char * n, HClass H>
         struct NamedHeuristic {
             template <uint size> using type = H<size>;
             static constexpr const char * name = n;

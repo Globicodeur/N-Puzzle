@@ -6,7 +6,7 @@ namespace algorithm {
 
     namespace heuristics {
 
-        template <template <uint> class... Heuristics>
+        template <HClass... Heuristics>
         struct Composition {
 
             template <uint size>

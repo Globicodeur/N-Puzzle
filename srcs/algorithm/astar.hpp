@@ -64,7 +64,7 @@ namespace algorithm {
         return solution;
     }
 
-    template <template <uint> class H, uint size>
+    template <HClass H, uint size>
     auto astar(const Puzzle<size> & start, const Puzzle<size> & goal) {
         // Type aliases
         using NodeT = Node<Puzzle<size>>;
@@ -129,7 +129,7 @@ namespace algorithm {
     }
 
     // WIP
-    template <template <uint> class H, uint size>
+    template <HClass H, uint size>
     auto idastar(const Puzzle<size> & start, const Puzzle<size> & goal) {
         // Type aliases
         using NodeT = Node<Puzzle<size>>;
