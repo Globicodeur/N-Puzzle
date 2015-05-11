@@ -128,4 +128,90 @@ namespace algorithm {
         throw error::PuzzleNotSolvable { };
     }
 
+    // WIP
+    template <template <uint> class H, uint size>
+    auto idastar(const Puzzle<size> & start, const Puzzle<size> & goal) {
+        // Type aliases
+        using NodeT = Node<Puzzle<size>>;
+        using OpenSet = boost::heap::fibonacci_heap<NodeT>;
+        using ClosedSet = std::unordered_set<NodeT, typename NodeT::Hasher>;
+        using Handles = std::unordered_map<
+            std::size_t,
+            typename OpenSet::handle_type
+        >;
+        //
+
+        const H<size> h { goal };
+
+        std::size_t selected = 0;
+        std::size_t statesInMemory = 0;
+        std::size_t maxStatesInMemory = 0;
+
+        uint nextTreshold = h(start);
+        uint treshold = std::numeric_limits<uint>::max();
+
+        while (treshold != nextTreshold) {
+            treshold = nextTreshold;
+            nextTreshold = std::numeric_limits<uint>::max();
+
+            maxStatesInMemory = std::max(maxStatesInMemory, statesInMemory);
+            std::cout << maxStatesInMemory << std::endl;
+            statesInMemory = 1;
+
+            ClosedSet closedSet;
+            OpenSet openSet;
+            Handles handles;
+
+            auto handle = openSet.emplace(start, 0, h(start), nullptr);
+            handles.emplace((*handle).hash, handle);
+
+            while (!openSet.empty()) {
+                auto & current = openSet.top();
+                ++selected;
+
+                if (current.data == goal) {
+                    maxStatesInMemory = std::max(maxStatesInMemory, statesInMemory);
+                    return backTrack(selected, maxStatesInMemory, current);
+                }
+
+                handles.erase(current.hash);
+
+                if (current.cost > treshold) {
+                    nextTreshold = std::min(nextTreshold, current.cost);
+                    openSet.pop();
+                    --statesInMemory;
+                    continue ;
+                }
+                auto neighbors = puzzle::neighbors(current.data);
+                auto newDistance = current.distance + 1;
+                auto inserted = closedSet.insert(std::move(current));
+
+                openSet.pop();
+                for (const auto & neighbor: neighbors) {
+                    NodeT neighborNode {
+                        neighbor,
+                        newDistance,
+                        newDistance + h(neighbor),
+                        &(*inserted.first) // <iterator<NodeT>, bool>
+                    };
+
+                    if (closedSet.count(neighborNode))
+                        continue ;
+
+                    auto handleIt = handles.find(neighborNode.hash);
+                    if (handleIt == handles.end()) {
+                        auto handle = openSet.push(neighborNode);
+                        handles.emplace(neighborNode.hash, handle);
+                        ++statesInMemory;
+                    }
+                    else if (newDistance < (*handleIt->second).distance)
+                        openSet.decrease(handleIt->second, neighborNode);
+                }
+
+            }
+        }
+        // We should never reach here if we passed the solvability test
+        throw error::PuzzleNotSolvable { };
+    }
+
 }
