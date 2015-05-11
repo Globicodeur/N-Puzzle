@@ -64,7 +64,7 @@ namespace algorithm {
         return solution;
     }
 
-    template <HClass H, uint size>
+    template <HClass H, bool uniform, uint size>
     auto astar(const Puzzle<size> & start, const Puzzle<size> & goal) {
         // Type aliases
         using NodeT = Node<Puzzle<size>>;
@@ -103,10 +103,14 @@ namespace algorithm {
             handles.erase(current.hash);
 
             for (const auto & neighbor: neighbors) {
+                auto newCost = h(neighbor);
+                if (uniform) // should be statically optimized
+                    newCost += newDistance;
+
                 NodeT neighborNode {
                     neighbor,
                     newDistance,
-                    newDistance + h(neighbor),
+                    newCost,
                     &(*inserted.first) // <iterator<NodeT>, bool>
                 };
 
@@ -128,7 +132,7 @@ namespace algorithm {
         throw error::PuzzleNotSolvable { };
     }
 
-    template <HClass H, uint size>
+    template <HClass H, bool uniform, uint size>
     auto idastar(const Puzzle<size> & start, const Puzzle<size> & goal) {
         // Type aliases
         using NodeT = Node<Puzzle<size>>;
@@ -180,10 +184,14 @@ namespace algorithm {
 
                 openSet.pop();
                 for (const auto & neighbor: neighbors) {
+                    auto newCost = h(neighbor);
+                    if (uniform) // should be statically optimized
+                        newCost += newDistance;
+
                     NodeT neighborNode {
                         neighbor,
                         newDistance,
-                        newDistance + h(neighbor),
+                        newCost,
                         &(*inserted.first) // <iterator<NodeT>, bool>
                     };
 
