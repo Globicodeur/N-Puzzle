@@ -1,8 +1,9 @@
 #include "Options.hpp"
 
-std::string                 Options::initialFile { };
-std::string                 Options::goalFile { };
-std::vector<std::string>    Options::heuristics { "manhattan" };
+std::string                 Options::initialFile    { };
+std::string                 Options::goalFile       { };
+std::vector<std::string>    Options::heuristics     { "manhattan" };
+std::string                 Options::searchStrategy { "uniform" };
 
 static auto getUsage(void) {
     po::options_description usage { "Available options" };
@@ -17,6 +18,8 @@ static auto getUsage(void) {
         ("heuristics",  po::value(&Options::heuristics)
                             ->multitoken(),
                         "Heuristics used for solving the puzzle")
+        ("strategy,s",  po::value(&Options::searchStrategy),
+                        "Search strategy (uniform or greedy)")
     ;
 
     return usage;

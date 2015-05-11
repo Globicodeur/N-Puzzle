@@ -38,17 +38,59 @@ private:
     ParsedPuzzle    initial;
     ParsedGoal      goal;
 
-    // This is the unrolling endpoint
-    template <HClass... Hs>
-    void solve(std::tuple<tools::Wrapper<Hs>...>) const {
+    struct UnknownHeuristic: public std::exception {
+
+        UnknownHeuristic(const std::string & name):
+            what_ { "Unknown heuristic: " + name }
+        { }
+
+        virtual const char * what() const noexcept {
+            return what_.c_str();
+        }
+
+    private:
+        std::string what_;
+    };
+
+    struct UnknownStrategy: public std::exception {
+
+        UnknownStrategy(const std::string & name):
+            what_ { "Unknown strategy: " + name }
+        { }
+
+        virtual const char * what() const noexcept {
+            return what_.c_str();
+        }
+
+    private:
+        std::string what_;
+    };
+
+    // This is the global unrolling endpoint
+    template <bool uniform, HClass... Hs>
+    void solve() const {
         using Heuristics = algorithm::heuristics::Composition<Hs...>;
-        using StaticSolver = algorithm::Solver<Heuristics::template Composer>;
+        using StaticSolver = algorithm::Solver<
+            Heuristics::template Composer,
+            uniform
+        >;
 
         StaticSolver solver { initial, goal };
 
         solver.solve([](const auto & solution) {
             std::cout << solution << std::endl;
         });
+    }
+
+    // This is the heuristic endpoint. It applies the runtime strategy
+    template <HClass... Hs>
+    void solveWithStrategy(std::tuple<tools::Wrapper<Hs>...>) const {
+        if (Options::searchStrategy == "uniform")
+            solve<true, Hs...>();
+        else if (Options::searchStrategy == "greedy")
+            solve<false, Hs...>();
+        else
+            throw UnknownStrategy { Options::searchStrategy };
     }
 
     // Checks a runtime heuristic name and inserts its matching class into the
@@ -68,8 +110,8 @@ private:
         return false;
     }
 
-    // Calls the endpoint if all the names are processed. Adds the next
-    // heuristic otherwise
+    // Calls the heuristic endpoint if all the names are processed. Adds the
+    // next heuristic otherwise
     template <std::size_t i, class Set>
     std::enable_if_t<i <= HEURISTICS_COUNT>
     solveWithHeuristics() const {
@@ -80,7 +122,7 @@ private:
         >::type;
 
         if (i == Options::heuristics.size())
-            return solve(HeuristicsTuple { });
+            return solveWithStrategy(HeuristicsTuple { });
 
         addHeuristic<i, 0, Set>();
     }
@@ -105,7 +147,7 @@ private:
     std::enable_if_t<h_i == HEURISTICS_COUNT - 1>
     addHeuristic() const {
         if (!optionMatch<opt_i, h_i, Set>())
-            throw Application::UnknownHeuristic { Options::heuristics.at(opt_i) };
+            throw UnknownHeuristic { Options::heuristics.at(opt_i) };
     }
 
 };
@@ -129,13 +171,18 @@ void Application::run(void) {
     solver.solve(); // This line is the nightmare of every compiler
 #else
     // STATIC composition (for debugging purposes and because fuck compilers)
+    constexpr bool uniform = true;
     using StaticHeuristics = algorithm::heuristics::Composition<
           algorithm::heuristics::ManhattanDistance
         , algorithm::heuristics::LinearConflict
         // , algorithm::heuristics::MisplacedTiles
         // , algorithm::heuristics::MisplacedRowsAndColumns
     >;
-    using StaticSolver = algorithm::Solver<StaticHeuristics::template Composer>;
+    using StaticSolver = algorithm::Solver<
+        StaticHeuristics::template Composer,
+        uniform
+    >;
+
     StaticSolver debugSolver { initialState, goalState };
     debugSolver.solve([](const auto & solution) {
         std::cout << solution << std::endl;

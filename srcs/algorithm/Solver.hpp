@@ -11,7 +11,7 @@ namespace algorithm {
 
     using parsing::ParsedPuzzle;
 
-    template <HClass Heuristic>
+    template <HClass Heuristic, bool uniformCost>
     class Solver {
 
         using ParsedGoal = boost::optional<ParsedPuzzle>;
@@ -80,7 +80,7 @@ namespace algorithm {
                 throw error::PuzzleNotSolvable { };
 
             tools::Benchmark bench { "Computation time" };
-            onSolved(astar<Heuristic>(start, end));
+            onSolved(astar<Heuristic, uniformCost>(start, end));
         }
 
         // Builds a puzzle of known size from nested vectors of values
