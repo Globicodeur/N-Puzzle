@@ -18,7 +18,8 @@ LIB_DIRS		=	$(HOME)/.brew/Cellar/boost/1.57.0/lib
 LIB_NAMES		=	boost_program_options
 
 CFLAGS			=	-Wall -Wextra -Werror -std=c++1y -O3\
-					$(foreach dir, $(INCLUDE_DIRS), -I $(dir))
+					$(foreach dir, $(INCLUDE_DIRS), -I $(dir))\
+					$(foreach define, $(PP_DEFINES), -D $(define))
 LFLAGS			=	$(foreach dir, $(LIB_DIRS), -L $(dir))\
 					$(foreach name, $(LIB_NAMES), -l$(name))
 
