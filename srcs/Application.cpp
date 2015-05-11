@@ -28,9 +28,9 @@ void solve(Initial initial, Goal goal, std::tuple<tools::Wrapper<Hs>...>) {
     using Heuristics = algorithm::heuristics::Composition<Hs...>;
     using SolverT = algorithm::Solver<Heuristics::template Composer>;
 
-    SolverT solver;
+    SolverT solver { initial, goal };
 
-    solver.solve(initial, goal, [](const auto & solution) {
+    solver.solve([](const auto & solution) {
         std::cout << solution << std::endl;
     });
 }

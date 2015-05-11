@@ -11,19 +11,29 @@ namespace algorithm {
 
     using parsing::ParsedPuzzle;
 
-    template <template <uint> class Heuristic>
-    struct Solver {
+    template <HClass Heuristic>
+    class Solver {
+
+        using ParsedGoal = boost::optional<ParsedPuzzle>;
+
+    public:
+
+        Solver(const ParsedPuzzle & initial, const ParsedGoal & goal):
+            initial { initial },
+            goal    { goal }
+        { }
 
         template <class F>
-        void solve(const ParsedPuzzle & parsed,
-                   boost::optional<ParsedPuzzle> goal,
-                   F onSolved) {
-            if (parsed.size() == 0)
+        void solve(F onSolved) {
+            if (initial.size() == 0)
                 throw error::EmptyPuzzle { };
-            findAndApplyStaticSolver<1>(parsed, goal, onSolved);
+            findAndApplyStaticSolver<1>(onSolved);
         }
 
     private:
+
+        ParsedPuzzle initial;
+        ParsedGoal   goal;
 
         // Runtime value unrolling
         // -> iterating over the puzzle size (determined at runtime) to apply a
@@ -32,32 +42,28 @@ namespace algorithm {
         // (BTW, fuck clang 3.6 for still not supporting non type template
         // parameter packs)
         template <uint size, class F>
-        static std::enable_if_t<size == MAX_PUZZLE_SIZE>
-        findAndApplyStaticSolver(const ParsedPuzzle & parsed,
-                                 boost::optional<ParsedPuzzle> goal,
-                                 F onSolved) {
-            if (parsed.size() != size)
-                throw error::PuzzleSizeTooLarge { parsed.size() };
-            solve<size>(parsed, goal, onSolved);
+        std::enable_if_t<size == MAX_PUZZLE_SIZE>
+        findAndApplyStaticSolver(F onSolved) const {
+            if (initial.size() != size)
+                throw error::PuzzleSizeTooLarge { initial.size() };
+
+            solve<size>(onSolved);
         }
 
         template <uint size, class F>
-        static std::enable_if_t<size < MAX_PUZZLE_SIZE>
-        findAndApplyStaticSolver(const ParsedPuzzle & parsed,
-                                 boost::optional<ParsedPuzzle> goal,
-                                 F onSolved) {
-            if (parsed.size() == size)
-                return solve<size>(parsed, goal, onSolved);
-            return findAndApplyStaticSolver<size + 1>(parsed, goal, onSolved);
+        std::enable_if_t<size < MAX_PUZZLE_SIZE>
+        findAndApplyStaticSolver(F onSolved) const {
+            if (initial.size() == size)
+                return solve<size>(onSolved);
+
+            findAndApplyStaticSolver<size + 1>(onSolved);
         }
 
         template <uint size, class F>
-        static void solve(const ParsedPuzzle & parsed,
-                          boost::optional<ParsedPuzzle> goal,
-                          F onSolved) {
+        void solve(F onSolved) const {
             Puzzle<size> start, end;
 
-            start = buildStaticPuzzle<size>(parsed);
+            start = buildStaticPuzzle<size>(initial);
             if (goal) {
                 if (goal->size() != size)
                     throw error::GoalSizeMismatch { goal->size(), size };
