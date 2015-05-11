@@ -128,7 +128,6 @@ namespace algorithm {
         throw error::PuzzleNotSolvable { };
     }
 
-    // WIP
     template <HClass H, uint size>
     auto idastar(const Puzzle<size> & start, const Puzzle<size> & goal) {
         // Type aliases
@@ -155,7 +154,6 @@ namespace algorithm {
             nextTreshold = std::numeric_limits<uint>::max();
 
             maxStatesInMemory = std::max(maxStatesInMemory, statesInMemory);
-            std::cout << maxStatesInMemory << std::endl;
             statesInMemory = 1;
 
             ClosedSet closedSet;
@@ -176,12 +174,6 @@ namespace algorithm {
 
                 handles.erase(current.hash);
 
-                if (current.cost > treshold) {
-                    nextTreshold = std::min(nextTreshold, current.cost);
-                    openSet.pop();
-                    --statesInMemory;
-                    continue ;
-                }
                 auto neighbors = puzzle::neighbors(current.data);
                 auto newDistance = current.distance + 1;
                 auto inserted = closedSet.insert(std::move(current));
@@ -197,6 +189,11 @@ namespace algorithm {
 
                     if (closedSet.count(neighborNode))
                         continue ;
+
+                    if (neighborNode.cost > treshold) {
+                        nextTreshold = std::min(nextTreshold, neighborNode.cost);
+                        continue ;
+                    }
 
                     auto handleIt = handles.find(neighborNode.hash);
                     if (handleIt == handles.end()) {
