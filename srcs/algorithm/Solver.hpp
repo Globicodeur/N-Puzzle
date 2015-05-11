@@ -32,8 +32,8 @@ namespace algorithm {
 
     private:
 
-        ParsedPuzzle initial;
-        ParsedGoal   goal;
+        ParsedPuzzle    initial;
+        ParsedGoal      goal;
 
         // Runtime value unrolling
         // -> iterating over the puzzle size (determined at runtime) to apply a
