@@ -78,26 +78,30 @@ namespace algorithm {
 
         const H<size> h { goal };
 
+        std::size_t selected = 0;
+        std::size_t statesInMemory = 1;
+
         ClosedSet closedSet;
         OpenSet openSet;
         Handles handles;
-        std::size_t i = 1;
 
         auto handle = openSet.emplace(start, 0, h(start), nullptr);
         handles.emplace((*handle).hash, handle);
 
         while (!openSet.empty()) {
             auto & current = openSet.top();
-            if (current.data == goal)
-                return backTrack(closedSet.size() + 1, i, current);
+            ++selected;
 
-            handles.erase(current.hash);
+            if (current.data == goal)
+                return backTrack(selected, statesInMemory, current);
 
             auto neighbors = puzzle::neighbors(current.data);
             auto newDistance = current.distance + 1;
             auto inserted = closedSet.insert(std::move(current));
 
             openSet.pop();
+            handles.erase(current.hash);
+
             for (const auto & neighbor: neighbors) {
                 NodeT neighborNode {
                     neighbor,
@@ -113,7 +117,7 @@ namespace algorithm {
                 if (handleIt == handles.end()) {
                     auto handle = openSet.push(neighborNode);
                     handles.emplace(neighborNode.hash, handle);
-                    ++i;
+                    ++statesInMemory;
                 }
                 else if (newDistance < (*handleIt->second).distance)
                     openSet.decrease(handleIt->second, neighborNode);
