@@ -1,120 +1,144 @@
 #include "Application.hpp"
 
 #include "options/Options.hpp"
+
 #include "parsing/Parser.hpp"
+
+#include "tools/type_traits.hpp"
 
 #include "algorithm/Solver.hpp"
 #include "algorithm/heuristics.hpp"
 #include "algorithm/heuristic_composition.hpp"
 
-#include "tools/type_traits.hpp"
+using parsing::ParsedPuzzle;
 
-// Forwards
-using Initial = const parsing::ParsedPuzzle &;
-using Goal = boost::optional<parsing::ParsedPuzzle>;
 using algorithm::heuristics::HEURISTICS_COUNT;
 
-template <std::size_t opt_i, std::size_t h_i, class Set>
-std::enable_if_t<h_i == HEURISTICS_COUNT - 1>
-addHeuristic(Initial, Goal);
+// This is just a helper class that will unroll runtime options to call a
+// matching static solver on the input
+// /!\ Since there are a lot of possible static solvers to generate, this class
+// can slow down compilation by a lot!
+class RuntimeSolver {
 
-template <std::size_t opt_i, std::size_t h_i, class Set>
-std::enable_if_t<h_i != HEURISTICS_COUNT - 1>
-addHeuristic(Initial, Goal);
-//
+    using ParsedGoal = boost::optional<parsing::ParsedPuzzle>;
 
-template <HClass... Hs>
-void solve(Initial initial, Goal goal, std::tuple<tools::Wrapper<Hs>...>) {
-    using Heuristics = algorithm::heuristics::Composition<Hs...>;
-    using SolverT = algorithm::Solver<Heuristics::template Composer>;
+public:
 
-    SolverT solver { initial, goal };
+    RuntimeSolver(const ParsedPuzzle & initial, const ParsedGoal & goal):
+        initial { initial },
+        goal    { goal }
+    { }
 
-    solver.solve([](const auto & solution) {
-        std::cout << solution << std::endl;
-    });
-}
-
-template <std::size_t i, class Set>
-std::enable_if_t<(i > HEURISTICS_COUNT)>
-solveWithHeuristics(Initial, Goal) {
-    throw std::out_of_range { "Too many heuristics given" };
-}
-
-template <std::size_t i, class Set>
-std::enable_if_t<
-    boost::mpl::size<Set>::type::value != 0 &&
-    i <= HEURISTICS_COUNT
->
-solveWithHeuristics(Initial initial, Goal goal) {
-    using HeuristicsTuple = typename tools::Unify<
-        std::tuple,
-        Set,
-        boost::mpl::size<Set>::type::value
-    >::type;
-
-    if (i == Options::heuristics.size())
-        return solve(initial, goal, HeuristicsTuple { });
-    addHeuristic<i, 0, Set>(initial, goal);
-}
-
-template <std::size_t opt_i, std::size_t h_i, class Set>
-bool optionMatch(Initial initial, Goal goal) {
-    using Heuristic = algorithm::heuristics::HeuristicAt<h_i>;
-    using NewSet = typename boost::mpl::insert<
-        Set,
-        tools::Wrapper<Heuristic::template type>
-    >::type;
-
-    if (Heuristic::name == Options::heuristics.at(opt_i)) {
-        solveWithHeuristics<opt_i + 1, NewSet>(initial, goal);
-        return true;
+    void solve() const {
+        addHeuristic<0, 0, boost::mpl::set<>>();
     }
-    return false;
-}
 
-template <std::size_t opt_i, std::size_t h_i, class Set>
-std::enable_if_t<h_i == HEURISTICS_COUNT - 1>
-addHeuristic(Initial initial, Goal goal) {
-    if (!optionMatch<opt_i, h_i, Set>(initial, goal))
-        throw Application::UnknownHeuristic { Options::heuristics.at(opt_i) };
-}
+private:
 
-template <std::size_t opt_i, std::size_t h_i, class Set>
-std::enable_if_t<h_i != HEURISTICS_COUNT - 1>
-addHeuristic(Initial initial, Goal goal) {
-    if (!optionMatch<opt_i, h_i, Set>(initial, goal))
-        addHeuristic<opt_i, h_i + 1, Set>(initial, goal);
-}
+    ParsedPuzzle    initial;
+    ParsedGoal      goal;
+
+    // This is the unrolling endpoint
+    template <HClass... Hs>
+    void solve(std::tuple<tools::Wrapper<Hs>...>) const {
+        using Heuristics = algorithm::heuristics::Composition<Hs...>;
+        using StaticSolver = algorithm::Solver<Heuristics::template Composer>;
+
+        StaticSolver solver { initial, goal };
+
+        solver.solve([](const auto & solution) {
+            std::cout << solution << std::endl;
+        });
+    }
+
+    // Checks a runtime heuristic name and inserts its matching class into the
+    // heuristic set if it is valid
+    template <std::size_t opt_i, std::size_t h_i, class Set>
+    bool optionMatch() const {
+        using Heuristic = algorithm::heuristics::HeuristicAt<h_i>;
+        using NewSet = typename boost::mpl::insert<
+            Set,
+            tools::Wrapper<Heuristic::template type>
+        >::type;
+
+        if (Heuristic::name == Options::heuristics.at(opt_i)) {
+            solveWithHeuristics<opt_i + 1, NewSet>();
+            return true;
+        }
+        return false;
+    }
+
+    // Calls the endpoint if all the names are processed. Adds the next
+    // heuristic otherwise
+    template <std::size_t i, class Set>
+    std::enable_if_t<i <= HEURISTICS_COUNT>
+    solveWithHeuristics() const {
+        using HeuristicsTuple = typename tools::Unify<
+            std::tuple,
+            Set,
+            boost::mpl::size<Set>::type::value
+        >::type;
+
+        if (i == Options::heuristics.size())
+            return solve(HeuristicsTuple { });
+
+        addHeuristic<i, 0, Set>();
+    }
+
+    // Edge unrolling case
+    template <std::size_t i, class Set>
+    std::enable_if_t<(i > HEURISTICS_COUNT)>
+    solveWithHeuristics() const {
+        throw std::out_of_range { "Too many heuristics given" };
+    }
+
+    // Trying to match the `h_i`-th heuristic name
+    template <std::size_t opt_i, std::size_t h_i, class Set>
+    std::enable_if_t<h_i != HEURISTICS_COUNT - 1>
+    addHeuristic() const {
+        if (!optionMatch<opt_i, h_i, Set>())
+            addHeuristic<opt_i, h_i + 1, Set>();
+    }
+
+    // Trying to match the last heuristic name. Throwing if it does not
+    template <std::size_t opt_i, std::size_t h_i, class Set>
+    std::enable_if_t<h_i == HEURISTICS_COUNT - 1>
+    addHeuristic() const {
+        if (!optionMatch<opt_i, h_i, Set>())
+            throw Application::UnknownHeuristic { Options::heuristics.at(opt_i) };
+    }
+
+};
 
 Application::Application(int argc, char **argv) {
     Options::parseFromCommandLine(argc, argv);
 }
 
-template <std::size_t i = 0, HClass... Hs>
-std::enable_if_t<sizeof...(Hs) == 0>
-solveWithHeuristics(Initial initial, Goal goal) {
-    addHeuristic<0, 0, boost::mpl::set<>>(initial, goal);
-}
-
 void Application::run(void) {
     parsing::Parser parser;
-    parsing::ParsedPuzzle initialState;
-    Goal goalState;
+    ParsedPuzzle initialState;
+    boost::optional<ParsedPuzzle> goalState;
 
     initialState = parser.parse(Options::initialFile);
     if (!Options::goalFile.empty())
         goalState = parser.parse(Options::goalFile);
 
+#ifndef DEBUG
     // RUNTIME composition
-    solveWithHeuristics(initialState, goalState);
-
-    // STATIC composition (because fuck compilers)
-    using StaticHeuristics = std::tuple<
-          tools::Wrapper<algorithm::heuristics::ManhattanDistance>
-        , tools::Wrapper<algorithm::heuristics::LinearConflict>
-        // , tools::Wrapper<algorithm::heuristics::MisplacedTiles>
-        // , tools::Wrapper<algorithm::heuristics::MisplacedRowsAndColumns>
+    RuntimeSolver solver { initialState, goalState };
+    solver.solve(); // This line is the nightmare of every compiler
+#else
+    // STATIC composition (for debugging purposes and because fuck compilers)
+    using StaticHeuristics = algorithm::heuristics::Composition<
+          algorithm::heuristics::ManhattanDistance
+        , algorithm::heuristics::LinearConflict
+        // , algorithm::heuristics::MisplacedTiles
+        // , algorithm::heuristics::MisplacedRowsAndColumns
     >;
-    solve(initialState, goalState, StaticHeuristics{});
+    using StaticSolver = algorithm::Solver<StaticHeuristics::template Composer>;
+    StaticSolver debugSolver { initialState, goalState };
+    debugSolver.solve([](const auto & solution) {
+        std::cout << solution << std::endl;
+    });
+#endif
 }
