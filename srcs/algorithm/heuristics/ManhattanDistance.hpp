@@ -9,6 +9,8 @@ namespace algorithm {
         template <uint size>
         struct ManhattanDistance {
 
+            static constexpr std::size_t id = 0;
+
             ManhattanDistance(const puzzle::Puzzle<size> & goal) {
                 for (uint i = 0; i < size * size; ++i)
                     indexes[goal.grid[i]] = i;

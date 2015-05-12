@@ -9,6 +9,8 @@ namespace algorithm {
         template <uint size>
         struct LinearConflict {
 
+            static constexpr std::size_t id = 1;
+
             LinearConflict(const puzzle::Puzzle<size> & goal) {
                 for (uint i = 0; i < size * size; ++i)
                     goalIndexes[goal.grid[i]] = i;

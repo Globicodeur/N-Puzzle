@@ -9,6 +9,8 @@ namespace algorithm {
         template <uint size>
         struct MisplacedTiles {
 
+            static constexpr std::size_t id = 2;
+
             MisplacedTiles(const puzzle::Puzzle<size> & goal) {
                 for (uint i = 0; i < size * size; ++i)
                     indexes[goal.grid[i]] = i;
