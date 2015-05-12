@@ -3,27 +3,41 @@
 namespace tools {
 
     template <
-        template <class...> class OutSeqType,
-        class Sequence,
-        std::size_t nSeqSize,
-        class ... Elements
-    > struct Unify {
-        using Next = typename boost::mpl::front<Sequence>::type;
-        using type = typename Unify<
-            OutSeqType,
-            typename boost::mpl::erase_key<Sequence, Next>::type,
-            nSeqSize - 1, Next, Elements...
+        class In,
+        template <class...> class Out,
+        class Compare,
+        std::size_t size,
+        class... Elements
+    >
+    struct Sort {
+
+        using Next = typename boost::mpl::deref<
+            typename boost::mpl::max_element<
+                In,
+                Compare
+            >::type
         >::type;
+
+        using type = typename Sort<
+            typename boost::mpl::erase_key<In, Next>::type,
+            Out,
+            Compare,
+            size - 1,
+            Next, Elements...
+        >::type;
+
     };
 
     template <
-        template <class...> class OutSeqType,
-        class Sequence,
-        class ... Elements
-    > struct Unify<OutSeqType, Sequence, 0ul, Elements...> {
-        using type = OutSeqType<Elements...>;
-    };
+        class In,
+        template <class...> class Out,
+        class Compare,
+        class... Elements
+    >
+    struct Sort<In, Out, Compare, 0ul, Elements...> {
 
-    template <HClass H> struct Wrapper { };
+        using type = Out<Elements...>;
+
+    };
 
 }

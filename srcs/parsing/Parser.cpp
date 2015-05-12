@@ -1,22 +1,9 @@
 #include "Parser.hpp"
 
 #include "grammar.hpp"
+#include "exceptions.hpp"
 
 namespace parsing {
-
-    struct ParseError: public std::exception {
-
-        ParseError(const std::string & what):
-            what_("Parse error: " + what)
-        { }
-
-        virtual const char * what() const noexcept {
-            return what_.c_str();
-        }
-
-    private:
-        std::string what_;
-    };
 
     template <class It>
     static ParsedPuzzle parsePuzzle(It begin, It end) {
@@ -27,9 +14,9 @@ namespace parsing {
         bool allConsummed = (begin == end);
 
         if (!parseOk)
-            throw ParseError { "invalid puzzle format" };
+            throw error::ParseError { "invalid puzzle format" };
         if (!allConsummed)
-            throw ParseError { "remaining input" };
+            throw error::ParseError { "remaining input" };
 
         return puzzle;
     }
