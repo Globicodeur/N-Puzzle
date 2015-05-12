@@ -4,6 +4,7 @@
 #include "heuristics/LinearConflict.hpp"
 #include "heuristics/MisplacedTiles.hpp"
 #include "heuristics/MisplacedRowsAndColumns.hpp"
+#include "heuristics/Gaschnig.hpp"
 
 namespace algorithm {
 
