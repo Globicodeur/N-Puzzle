@@ -9,7 +9,7 @@ namespace algorithm {
 
     namespace heuristics {
 
-        template <HClass H> struct HWrapper {
+        template <HClass H> struct Wrapper {
 
             template <uint s>
             using heuristic = H<s>;
@@ -17,10 +17,7 @@ namespace algorithm {
         };
 
         template <HClass H, const char * n>
-        struct HeuristicTrait {
-
-            template <uint size>
-            using heuristic = H<size>;
+        struct Trait: Wrapper<H> {
 
             static constexpr const char * name = n;
 
@@ -55,10 +52,10 @@ namespace algorithm {
         constexpr char misplacedRCName[]    = "misplacedRC";
 
         using Heuristics = std::tuple<
-            HeuristicTrait<ManhattanDistance,       manhattanName>,
-            HeuristicTrait<LinearConflict,          linearName>,
-            HeuristicTrait<MisplacedTiles,          misplacedName>,
-            HeuristicTrait<MisplacedRowsAndColumns, misplacedRCName>
+            Trait<ManhattanDistance,       manhattanName>,
+            Trait<LinearConflict,          linearName>,
+            Trait<MisplacedTiles,          misplacedName>,
+            Trait<MisplacedRowsAndColumns, misplacedRCName>
         >;
 
         template <std::size_t i>

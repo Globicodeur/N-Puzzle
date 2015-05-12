@@ -90,7 +90,7 @@ namespace runtime {
             using HeuristicTrait = TraitAt<h_i>;
             using NewSet = typename boost::mpl::insert<
                 HeuristicSet,
-                HWrapper<HeuristicTrait::template heuristic>
+                Wrapper<HeuristicTrait::template heuristic>
             >::type;
 
             if (HeuristicTrait::name == Options::heuristics.at(opt_i)) {
