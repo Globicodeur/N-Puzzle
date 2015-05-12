@@ -2,7 +2,7 @@
 
 namespace algorithm {
 
-    static constexpr auto MAX_PUZZLE_SIZE = 5u;
+    static constexpr auto MAX_PUZZLE_SIZE = 11u;
 
     namespace error {
 
