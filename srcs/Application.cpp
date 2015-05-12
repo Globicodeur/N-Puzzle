@@ -66,13 +66,28 @@ private:
         std::string what_;
     };
 
+    struct UnknownAStarVariant: public std::exception {
+
+        UnknownAStarVariant(const std::string & name):
+            what_ { "Unknown A* variant: " + name }
+        { }
+
+        virtual const char * what() const noexcept {
+            return what_.c_str();
+        }
+
+    private:
+        std::string what_;
+    };
+
     // This is the global unrolling endpoint
-    template <bool uniform, HClass... Hs>
+    template <bool ida, bool uniform, HClass... Hs>
     void solve() const {
         using Heuristics = algorithm::heuristics::Composition<Hs...>;
         using StaticSolver = algorithm::Solver<
             Heuristics::template Composer,
-            uniform
+            uniform,
+            ida
         >;
 
         StaticSolver solver { initial, goal };
@@ -82,13 +97,24 @@ private:
         });
     }
 
+    // This is the astar variant endpoint. It applies the chosen astar function
+    template <bool uniform, HClass... Hs>
+    void solveWithAstarVariant() const {
+        if (Options::astarVariant == "astar")
+            solve<false, uniform, Hs...>();
+        else if (Options::astarVariant == "idastar")
+            solve<true, uniform, Hs...>();
+        else
+            throw UnknownAStarVariant { Options::astarVariant };
+    }
+
     // This is the heuristic endpoint. It applies the runtime strategy
     template <HClass... Hs>
     void solveWithStrategy(std::tuple<tools::Wrapper<Hs>...>) const {
         if (Options::searchStrategy == "uniform")
-            solve<true, Hs...>();
+            solveWithAstarVariant<true, Hs...>();
         else if (Options::searchStrategy == "greedy")
-            solve<false, Hs...>();
+            solveWithAstarVariant<false, Hs...>();
         else
             throw UnknownStrategy { Options::searchStrategy };
     }
@@ -172,6 +198,7 @@ void Application::run(void) {
 #else
     // STATIC composition (for debugging purposes and because fuck compilers)
     constexpr bool uniform = true;
+    constexpr bool ida = false;
     using StaticHeuristics = algorithm::heuristics::Composition<
           algorithm::heuristics::ManhattanDistance
         , algorithm::heuristics::LinearConflict
@@ -180,7 +207,8 @@ void Application::run(void) {
     >;
     using StaticSolver = algorithm::Solver<
         StaticHeuristics::template Composer,
-        uniform
+        uniform,
+        ida
     >;
 
     StaticSolver debugSolver { initialState, goalState };
