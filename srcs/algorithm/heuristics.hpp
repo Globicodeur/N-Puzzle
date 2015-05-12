@@ -37,6 +37,7 @@ namespace algorithm {
         REGISTER_ID(LinearConflict,          1);
         REGISTER_ID(MisplacedTiles,          2);
         REGISTER_ID(MisplacedRowsAndColumns, 3);
+        REGISTER_ID(Gaschnig,                4);
         #undef REGISTER_ID
 
         template <class WrappedH> struct WrappedId {
@@ -51,12 +52,14 @@ namespace algorithm {
         constexpr char linearName[]         = "linear";
         constexpr char misplacedName[]      = "misplaced";
         constexpr char misplacedRCName[]    = "misplacedRC";
+        constexpr char gaschnig[]           = "gaschnig";
 
         using Heuristics = std::tuple<
             Trait<ManhattanDistance,       manhattanName>,
             Trait<LinearConflict,          linearName>,
             Trait<MisplacedTiles,          misplacedName>,
-            Trait<MisplacedRowsAndColumns, misplacedRCName>
+            Trait<MisplacedRowsAndColumns, misplacedRCName>,
+            Trait<Gaschnig,                gaschnig>
         >;
 
         template <std::size_t i>
