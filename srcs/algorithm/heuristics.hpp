@@ -52,14 +52,14 @@ namespace algorithm {
         constexpr char linearName[]         = "linear";
         constexpr char misplacedName[]      = "misplaced";
         constexpr char misplacedRCName[]    = "misplacedRC";
-        constexpr char gaschnig[]           = "gaschnig";
+        constexpr char gaschnigName[]       = "gaschnig";
 
         using Heuristics = std::tuple<
             Trait<ManhattanDistance,       manhattanName>,
             Trait<LinearConflict,          linearName>,
             Trait<MisplacedTiles,          misplacedName>,
             Trait<MisplacedRowsAndColumns, misplacedRCName>,
-            Trait<Gaschnig,                gaschnig>
+            Trait<Gaschnig,                gaschnigName>
         >;
 
         template <std::size_t i>
