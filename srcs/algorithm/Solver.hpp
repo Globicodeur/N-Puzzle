@@ -86,16 +86,8 @@ namespace algorithm {
                 onSolved(astar<Heuristic, uniform>(start, end));
         }
 
-        // Builds a puzzle of known size from nested vectors of values
-        template <uint size>
-        static auto buildStaticPuzzle(const ParsedPuzzle & parsed) {
-            puzzle::Puzzle<size> puzzle;
 
-            for (uint y = 0; y < size; ++y)
-                for (uint x = 0; x < size; ++x)
-                    puzzle.grid[y * size + x] = parsed.at(y).at(x);
 
-            return puzzle;
         }
 
     };

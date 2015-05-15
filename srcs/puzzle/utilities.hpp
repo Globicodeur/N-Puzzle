@@ -2,6 +2,8 @@
 
 #include "Puzzle.hpp"
 
+#include "parsing/forwards.hpp"
+
 namespace puzzle {
 
     // Puzzle hashing helper
@@ -33,7 +35,19 @@ namespace puzzle {
         return os;
     }
 
-    // Build a 'snail' puzzle like the ones in the subject
+    // Builds a puzzle of known size from nested vectors of values
+    template <uint size>
+    auto buildStaticPuzzle(const parsing::ParsedPuzzle & parsed) {
+        puzzle::Puzzle<size> puzzle;
+
+        for (uint y = 0; y < size; ++y)
+            for (uint x = 0; x < size; ++x)
+                puzzle.grid[y * size + x] = parsed.at(y).at(x);
+
+        return puzzle;
+    }
+
+    // Builds a 'snail' puzzle like the ones in the subject
     template <uint size>
     auto makeSnail(void) {
         struct Position { int x, y; };
@@ -61,7 +75,7 @@ namespace puzzle {
         return puzzle;
     }
 
-    // Find immediate neighbors for a given puzzle
+    // Finds immediate neighbors for a given puzzle
     template <uint size>
     auto neighbors(const Puzzle<size> & puzzle) {
         std::vector<Puzzle<size>> neighbors;
