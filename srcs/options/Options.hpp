@@ -2,6 +2,8 @@
 
 struct Options {
 
+    using seed_t = std::mt19937::result_type;
+
     static std::string              initialFile;
     static std::string              goalFile;
     static std::vector<std::string> heuristics;
@@ -10,6 +12,7 @@ struct Options {
     static bool                     randomGoal;
     static uint                     generationSize;
     static bool                     showMoves;
+    static seed_t                   randomSeed;
 
     static void parseFromCommandLine(int argc, char **argv);
 };

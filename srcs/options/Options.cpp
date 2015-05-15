@@ -8,6 +8,7 @@ std::string                 Options::astarVariant   { "astar" };
 bool                        Options::randomGoal     { false };
 uint                        Options::generationSize { 3 };
 bool                        Options::showMoves      { false };
+Options::seed_t             Options::randomSeed     { static_cast<seed_t>(std::time(nullptr)) };
 
 static auto getUsage(void) {
     po::options_description usage { "Available options" };
@@ -31,6 +32,8 @@ static auto getUsage(void) {
                         "Size of randomly generated states")
         ("show-moves",  po::bool_switch(&Options::showMoves),
                         "Display the states resulting from the path finding")
+        ("random-seed", po::value(&Options::randomSeed),
+                        "Seed for generating random states")
     ;
 
     return usage;

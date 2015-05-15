@@ -131,7 +131,7 @@ namespace puzzle {
     // Returns a random puzzle
     template <uint size>
     auto generate() {
-        static std::random_device seed;
+        static std::mt19937 engine { Options::randomSeed };
 
         Puzzle<size> puzzle;
 
@@ -144,7 +144,7 @@ namespace puzzle {
         std::shuffle(
             puzzle.grid,
             puzzle.grid + size * size,
-            seed
+            engine
         );
 
         return puzzle;
