@@ -24,6 +24,14 @@ namespace algorithm {
             std::string what_;
         };
 
+        struct ZeroGeneration: public std::exception {
+
+            virtual const char * what() const noexcept {
+                return "Solver error: it does not make sense to generate a 0-puzzle";
+            }
+
+        };
+
         struct EmptyPuzzle: public std::exception {
 
             virtual const char * what() const noexcept {

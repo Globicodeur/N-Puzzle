@@ -11,13 +11,15 @@ Application::Application(int argc, char **argv) {
 }
 
 void Application::run(void) {
-    parsing::Parser parser;
-    parsing::ParsedPuzzle initialState;
-    boost::optional<parsing::ParsedPuzzle> goalState;
+    using MaybeState = boost::optional<parsing::ParsedPuzzle>;
 
-    initialState = parser.parse(Options::initialFile);
+    parsing::Parser parser;
+    MaybeState initial, goal;
+
+    if (!Options::initialFile.empty())
+        initial = parser.parse(Options::initialFile);
     if (!Options::goalFile.empty())
-        goalState = parser.parse(Options::goalFile);
+        goal = parser.parse(Options::goalFile);
 
 #ifdef DEBUG
     // STATIC composition (for debugging purposes and because fuck compilers)
@@ -35,13 +37,13 @@ void Application::run(void) {
         ida
     >;
 
-    StaticSolver debugSolver { initialState, goalState };
+    StaticSolver debugSolver { initial, goal };
     debugSolver.solve([](const auto & solution) {
         std::cout << solution << std::endl;
     });
 #else
     // RUNTIME composition
-    runtime::Solver solver { initialState, goalState };
+    runtime::Solver solver { initial, goal };
     solver.solve(); // This line is the nightmare of every compiler
 #endif
 }

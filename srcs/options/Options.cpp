@@ -5,6 +5,8 @@ std::string                 Options::goalFile       { };
 std::vector<std::string>    Options::heuristics     { "manhattan" };
 std::string                 Options::searchStrategy { "uniform" };
 std::string                 Options::astarVariant   { "astar" };
+bool                        Options::randomGoal     { false };
+uint                        Options::generationSize { 3 };
 bool                        Options::showMoves      { false };
 
 static auto getUsage(void) {
@@ -12,18 +14,21 @@ static auto getUsage(void) {
 
     usage.add_options()
         ("help,h",      "Show this help message")
-        ("initial,i",   po::value(&Options::initialFile)
-                            ->required(),
+        ("initial,i",   po::value(&Options::initialFile),
                         "Input file for the initial state")
         ("goal,g",      po::value(&Options::goalFile),
                         "Input file for the goal state")
         ("heuristics",  po::value(&Options::heuristics)
                             ->multitoken(),
                         "Heuristics used for solving the puzzle")
-        ("strategy,s",  po::value(&Options::searchStrategy),
+        ("strategy",    po::value(&Options::searchStrategy),
                         "Search strategy (uniform or greedy)")
         ("variant,v",   po::value(&Options::astarVariant),
-                        "A* variant")
+                        "A* variant (astar or idastar)")
+        ("random-goal", po::bool_switch(&Options::randomGoal),
+                        "Generates a goal state other than a snail")
+        ("size,s",      po::value(&Options::generationSize),
+                        "Size of randomly generated states")
         ("show-moves",  po::bool_switch(&Options::showMoves),
                         "Display the states resulting from the path finding")
     ;

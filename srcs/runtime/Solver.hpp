@@ -12,8 +12,6 @@
 
 namespace runtime {
 
-    using parsing::ParsedPuzzle;
-
     using algorithm::heuristics::HEURISTICS_COUNT;
 
     // This is just a helper class that will unroll runtime options to call a
@@ -22,11 +20,11 @@ namespace runtime {
     // class can slow down compilation time by a lot!
     class Solver {
 
-        using ParsedGoal = boost::optional<ParsedPuzzle>;
+        using MaybeState = boost::optional<parsing::ParsedPuzzle>;
 
     public:
 
-        Solver(const ParsedPuzzle & initial, const ParsedGoal & goal):
+        Solver(const MaybeState & initial, const MaybeState & goal):
             initial { initial },
             goal    { goal }
         { }
@@ -37,8 +35,7 @@ namespace runtime {
 
     private:
 
-        ParsedPuzzle    initial;
-        ParsedGoal      goal;
+        MaybeState initial, goal;
 
         // This is the global unrolling endpoint
         template <bool ida, bool uniform, HClass... Hs>
