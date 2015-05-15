@@ -67,6 +67,14 @@ namespace algorithm {
 
         constexpr auto HEURISTICS_COUNT = std::tuple_size<Heuristics>::value;
 
+        std::unordered_map<std::string, std::string> prettyNames {
+            { manhattanName,    "Manhattan distance" },
+            { linearName,       "Linear conflict" },
+            { misplacedName,    "Misplaced tiles" },
+            { misplacedRCName,  "Misplaced rows and columns" },
+            { gaschnigName,     "Gaschnig" },
+        };
+
     }
 
 }

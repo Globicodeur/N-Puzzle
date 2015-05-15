@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ansi.hpp"
+
 namespace tools {
 
     struct Benchmark {
@@ -16,8 +18,8 @@ namespace tools {
             auto t1 = Clock::now();
             auto duration = duration_cast<nanoseconds>(t1 - t0_);
 
-            std::cout << description_ << ": "
-                      << duration.count() << " ns" << std::endl;
+            std::cout << description_ << ": " << ansi::BOLD << ansi::BLUE
+                      << duration.count() << " ns" << ansi::RESET << std::endl;
         }
 
     private:

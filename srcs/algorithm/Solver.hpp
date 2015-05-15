@@ -6,8 +6,10 @@
 
 #include "exceptions.hpp"
 #include "astar.hpp"
+#include "heuristics.hpp"
 
 #include "tools/Benchmark.hpp"
+#include "tools/ansi.hpp"
 
 namespace algorithm {
 
@@ -53,7 +55,66 @@ namespace algorithm {
 
         // This is the solver endpoint
         template <uint size, class F>
-        void solve(F onSolved) const {
+        void solve(Puzzle<size> start, Puzzle<size> end, F onSolved) const {
+            std::cout << "==============\n\n";
+            std::cout << "Initial state:\n\n" << ansi::BOLD << start << ansi::RESET << "\n\n";
+            std::cout << "Final state:\n\n" << ansi::BOLD << end << ansi::RESET << "\n";
+            std::cout << "==============\n\n";
+
+            if (!isSolvable(start, end))
+                throw error::PuzzleNotSolvable { };
+
+            std::cout << "A* variant:      " << ansi::BOLD << ansi::YELLOW
+                      << Options::astarVariant << ansi::RESET << "\n";
+            std::cout << "Search strategy: " << ansi::BOLD << ansi::YELLOW
+                      << Options::searchStrategy << ansi::RESET << "\n";
+            prettyPrintHeuristics();
+            if (!initial || (!goal && Options::randomGoal))
+                std::cout << "Random seed:     " << ansi::BOLD
+                          << Options::randomSeed << ansi::RESET << "\n";
+            std::cout << "\n==============\n" << std::endl;
+
+            tools::Benchmark bench { "Computation time" };
+            if (ida)
+                onSolved(idastar<Heuristic, uniform>(start, end));
+            else
+                onSolved(astar<Heuristic, uniform>(start, end));
+
+            std::cout << "==============\n\n";
+        }
+
+        static void prettyPrintHeuristics() {
+            using namespace algorithm::heuristics;
+            std::set<std::string> heuristics {
+                Options::heuristics.begin(),
+                Options::heuristics.end()
+            };
+
+            std::cout << "Heuristics:      " << ansi::BOLD << ansi::YELLOW
+                      << prettyNames[*heuristics.begin()];
+            auto it = std::next(heuristics.begin());
+            for (; it != heuristics.end(); ++it)
+                std::cout << " + " << prettyNames[*it];
+            std::cout << ansi::RESET << "\n";
+
+            // All of our heuristics are admissible in standalone
+            bool admissible = (heuristics.size() == 1);
+            // Special case for Manhattan + Linear which is also admissible
+            if (heuristics.size() == 2
+                && heuristics.count(manhattanName)
+                && heuristics.count(linearName))
+                admissible = true;
+
+            std::cout << "Admissible:      " << ansi::BOLD
+                      << (admissible ? ansi::GREEN : ansi::RED)
+                      << (admissible ? "Yes" : "No")
+                      << ansi::RESET << "\n";
+        }
+
+        // Calls the endpoint with static puzzles generated from either parsed
+        // puzzles or a random generator
+        template <uint size, class F>
+        void solveParsed(F onSolved) const {
             Puzzle<size> start, end;
 
             // Building the puzzles that are fixed
@@ -82,18 +143,7 @@ namespace algorithm {
                     end = snail;
             }
 
-            std::cout << "Initial state:\n\n" << start << "\n\n";
-            std::cout << "Final state:\n\n" << end << "\n";
-            std::cout << "==============\n" << std::endl;
-
-            if (!isSolvable(start, end))
-                throw error::PuzzleNotSolvable { };
-
-            tools::Benchmark bench { "Computation time" };
-            if (ida)
-                onSolved(idastar<Heuristic, uniform>(start, end));
-            else
-                onSolved(astar<Heuristic, uniform>(start, end));
+            solve(start, end, onSolved);
         }
 
         // Runtime value unrolling
@@ -112,7 +162,7 @@ namespace algorithm {
         std::enable_if_t<size <= MAX_PUZZLE_SIZE>
         findAndApplyStaticSolver(uint runtimeSize, F onSolved) const {
             if (runtimeSize == size)
-                return solve<size>(onSolved);
+                return solveParsed<size>(onSolved);
 
             findAndApplyStaticSolver<size + 1>(runtimeSize, onSolved);
         }
