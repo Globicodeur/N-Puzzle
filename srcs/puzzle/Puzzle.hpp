@@ -23,8 +23,8 @@ namespace puzzle {
         Puzzle(const Puzzle &)  = default;
         Puzzle(Puzzle &&)       = default;
 
+        Puzzle & operator=(const Puzzle & other)    = default;
         Puzzle & operator=(Puzzle &&)               = default;
-        Puzzle & operator=(const Puzzle & other)    = delete;
 
         bool operator==(const Puzzle & other) const {
             return !std::memcmp(grid, other.grid, sizeof(grid));
