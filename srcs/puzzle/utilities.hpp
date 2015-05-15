@@ -128,4 +128,37 @@ namespace puzzle {
         return startInversions % 2 == goalInversions % 2;
     }
 
+    // Returns a random puzzle
+    template <uint size>
+    auto generate() {
+        static std::random_device seed;
+
+        Puzzle<size> puzzle;
+
+        std::iota(
+            puzzle.grid,
+            puzzle.grid + size * size,
+            0
+        );
+
+        std::shuffle(
+            puzzle.grid,
+            puzzle.grid + size * size,
+            seed
+        );
+
+        return puzzle;
+    }
+
+    // Returns a random puzzle that is solvable for the given puzzle
+    template <uint size>
+    auto generateMatch(const Puzzle<size> & match) {
+        Puzzle<size> puzzle;
+
+        do {
+            puzzle = generate<size>();
+        } while(!isSolvable(puzzle, match));
+
+        return puzzle;
+    }
 }
