@@ -7,6 +7,7 @@ struct Options {
     static std::vector<std::string> heuristics;
     static std::string              searchStrategy;
     static std::string              astarVariant;
+    static bool                     showMoves;
 
     static void parseFromCommandLine(int argc, char **argv);
 };

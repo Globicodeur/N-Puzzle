@@ -5,6 +5,7 @@ std::string                 Options::goalFile       { };
 std::vector<std::string>    Options::heuristics     { "manhattan" };
 std::string                 Options::searchStrategy { "uniform" };
 std::string                 Options::astarVariant   { "astar" };
+bool                        Options::showMoves      { false };
 
 static auto getUsage(void) {
     po::options_description usage { "Available options" };
@@ -23,6 +24,8 @@ static auto getUsage(void) {
                         "Search strategy (uniform or greedy)")
         ("variant,v",   po::value(&Options::astarVariant),
                         "A* variant")
+        ("show-moves",  po::bool_switch(&Options::showMoves),
+                        "Display the states resulting from the path finding")
     ;
 
     return usage;
