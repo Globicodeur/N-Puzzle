@@ -13,7 +13,6 @@
 
 #include <boost/functional/hash.hpp>
 
-#include <boost/heap/binomial_heap.hpp>
 #include <boost/heap/fibonacci_heap.hpp>
 
 #include <boost/spirit/include/qi.hpp>
