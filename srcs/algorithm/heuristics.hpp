@@ -6,6 +6,8 @@
 #include "heuristics/MisplacedRowsAndColumns.hpp"
 #include "heuristics/Gaschnig.hpp"
 
+#include "heuristics/Composition.hpp"
+
 namespace algorithm {
 
     namespace heuristics {

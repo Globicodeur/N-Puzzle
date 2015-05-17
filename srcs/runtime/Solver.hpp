@@ -8,7 +8,6 @@
 
 #include "algorithm/Solver.hpp"
 #include "algorithm/heuristics.hpp"
-#include "algorithm/heuristic_composition.hpp"
 
 namespace runtime {
 

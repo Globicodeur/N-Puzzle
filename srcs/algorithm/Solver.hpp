@@ -5,8 +5,10 @@
 #include "options/Options.hpp"
 
 #include "exceptions.hpp"
-#include "astar.hpp"
 #include "heuristics.hpp"
+
+#include "path_finding/astar.hpp"
+#include "path_finding/idastar.hpp"
 
 #include "tools/Benchmark.hpp"
 #include "tools/ansi.hpp"
