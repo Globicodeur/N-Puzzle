@@ -57,8 +57,10 @@ namespace algorithm {
         template <uint size, class F>
         void solve(Puzzle<size> start, Puzzle<size> end, F onSolved) const {
             std::cout << "==============\n\n";
-            std::cout << "Initial state:\n\n" << ansi::BOLD << start << ansi::RESET << "\n\n";
-            std::cout << "Final state:\n\n" << ansi::BOLD << end << ansi::RESET << "\n";
+            std::cout << "Initial state:\n\n"
+                      << ansi::BOLD << start << ansi::RESET << "\n\n";
+            std::cout << "Final state:\n\n"
+                      << ansi::BOLD << end << ansi::RESET << "\n";
             std::cout << "==============\n\n";
 
             if (!isSolvable(start, end))

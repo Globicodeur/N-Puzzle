@@ -19,7 +19,7 @@ namespace puzzle {
         std::size_t timeComplexity;
         std::size_t spaceComplexity;
 
-        friend std::ostream & operator<<(std::ostream & os, const Solution & solution) {
+        friend auto operator<<(std::ostream & os, const Solution & solution) {
             if (Options::showMoves) {
                 os << "Moves:\n\n";
                 for (const auto & puzzle: solution)
