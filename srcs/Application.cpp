@@ -46,4 +46,5 @@ void Application::run(void) {
     runtime::Solver solver { initial, goal };
     solver.solve(); // This line is the nightmare of every compiler
 #endif
+    std::cout << "\n==============" << std::endl;
 }
