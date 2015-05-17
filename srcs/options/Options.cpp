@@ -1,5 +1,17 @@
 #include "Options.hpp"
 
+static Options::seed_t getRandomSeed() {
+    std::ifstream file { "/dev/urandom" };
+
+    if (file.is_open()) {
+        Options::seed_t seed;
+        file.read(reinterpret_cast<char *>(&seed), sizeof seed);
+        return seed;
+    }
+
+    return std::time(nullptr);
+}
+
 std::string                 Options::initialFile    { };
 std::string                 Options::goalFile       { };
 std::vector<std::string>    Options::heuristics     { "manhattan" };
@@ -8,7 +20,7 @@ std::string                 Options::astarVariant   { "astar" };
 bool                        Options::randomGoal     { false };
 uint                        Options::generationSize { 3 };
 bool                        Options::showMoves      { false };
-Options::seed_t             Options::randomSeed     { static_cast<seed_t>(std::time(nullptr)) };
+Options::seed_t             Options::randomSeed     { getRandomSeed() };
 
 static auto getUsage(void) {
     po::options_description usage { "Available options" };
