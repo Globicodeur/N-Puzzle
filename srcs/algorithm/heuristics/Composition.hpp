@@ -10,33 +10,36 @@ namespace algorithm {
         struct Composition {
 
             template <uint size>
-            class Composer: public Heuristics<size>... {
+            class Composer {
 
                 using Puzzle = puzzle::Puzzle<size>;
 
             public:
 
                 Composer(const Puzzle & goal):
-                    Heuristics<size> { goal } ...
+                    heuristics { Heuristics<size> { goal } ... }
                 { }
 
                 uint operator()(const Puzzle & puzzle) const {
-                    return call<Heuristics...>(puzzle);
+                    return call<sizeof...(Heuristics) - 1>(puzzle);
                 }
 
             private:
 
-                template <HClass H1, HClass... Hn>
-                std::enable_if_t<sizeof...(Hn) == 0, uint>
+                template <uint idx>
+                std::enable_if_t<idx == 0, uint>
                 call(const Puzzle & puzzle) const {
-                    return H1<size>::operator()(puzzle);
+                    return std::get<idx>(heuristics)(puzzle);
                 }
 
-                template <HClass H1, HClass... Hn>
-                std::enable_if_t<sizeof...(Hn) != 0, uint>
+                template <uint idx>
+                std::enable_if_t<idx != 0, uint>
                 call(const Puzzle & puzzle) const {
-                    return call<H1>(puzzle) + call<Hn...>(puzzle);
+                    return std::get<idx>(heuristics)(puzzle) +
+                           call<idx - 1>(puzzle);
                 }
+
+                std::tuple<Heuristics<size>...> heuristics;
 
             };
 
