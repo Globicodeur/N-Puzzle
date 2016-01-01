@@ -66,27 +66,28 @@ namespace runtime {
         }
 
         // This is the heuristic endpoint. It applies the runtime strategy
-        template <template <HClass> class Wrapper, HClass... Hs>
-        void solveWithStrategy(std::tuple<Wrapper<Hs>...>) const {
+        template <class... Traits>
+        void solveWithStrategy(std::tuple<Traits...>) const {
             if (Options::searchStrategy == "uniform")
-                solveWithAstarVariant<true, Hs...>();
+                solveWithAstarVariant<true, Traits::template heuristic...>();
             else if (Options::searchStrategy == "greedy")
-                solveWithAstarVariant<false, Hs...>();
+                solveWithAstarVariant<false, Traits::template heuristic...>();
             else
                 throw error::UnknownStrategy { Options::searchStrategy };
         }
 
         // Checks a runtime heuristic name and inserts its matching class into
         // the heuristic set if it is valid
-        template <class HeuristicSet, std::size_t opt_i, std::size_t h_i>
+        template <class HeuristicsSet, std::size_t opt_i, std::size_t h_i>
         bool optionMatch() const {
-            // Just in this scope to avoid cluttering
-            using namespace algorithm::heuristics;
             // Adding the heuristic to the set
-            using HeuristicTrait = TraitAt<h_i>;
+            using HeuristicTrait = std::tuple_element_t<
+                h_i,
+                algorithm::heuristics::Heuristics
+            >;
             using NewSet = typename boost::mpl::insert<
-                HeuristicSet,
-                Wrapper<HeuristicTrait::template heuristic>
+                HeuristicsSet,
+                HeuristicTrait
             >::type;
 
             if (HeuristicTrait::name == Options::heuristics.at(opt_i)) {
@@ -98,46 +99,45 @@ namespace runtime {
 
         // Calls the heuristic endpoint if all the names are processed. Adds the
         // next heuristic otherwise
-        template <class HeuristicSet, std::size_t i>
+        template <class HeuristicsSet, std::size_t i>
         std::enable_if_t<i <= HEURISTICS_COUNT>
         solveWithHeuristics() const {
             // Just in this scope to avoid cluttering
             using namespace boost::mpl;
-            using namespace algorithm::heuristics;
             // Sorting the heuristics to avoid irrelevant template instantiations
             using HeuristicsTuple = typename tools::Sort<
-                HeuristicSet,
+                HeuristicsSet,
                 std::tuple,
-                less<WrappedId<_1>, WrappedId<_2>>,
-                size<HeuristicSet>::type::value
+                less<_1, _2>,
+                size<HeuristicsSet>::type::value
             >::type;
 
             if (i == Options::heuristics.size())
                 return solveWithStrategy(HeuristicsTuple { });
 
-            addHeuristic<HeuristicSet, i, 0>();
+            addHeuristic<HeuristicsSet, i, 0>();
         }
 
         // Edge unrolling case
-        template <class HeuristicSet, std::size_t i>
+        template <class HeuristicsSet, std::size_t i>
         std::enable_if_t<(i > HEURISTICS_COUNT)>
         solveWithHeuristics() const {
             throw std::out_of_range { "Too many heuristics given" };
         }
 
         // Trying to match the `h_i`-th heuristic name
-        template <class HeuristicSet, std::size_t opt_i, std::size_t h_i>
+        template <class HeuristicsSet, std::size_t opt_i, std::size_t h_i>
         std::enable_if_t<h_i != HEURISTICS_COUNT - 1>
         addHeuristic() const {
-            if (!optionMatch<HeuristicSet, opt_i, h_i>())
-                addHeuristic<HeuristicSet, opt_i, h_i + 1>();
+            if (!optionMatch<HeuristicsSet, opt_i, h_i>())
+                addHeuristic<HeuristicsSet, opt_i, h_i + 1>();
         }
 
         // Trying to match the last heuristic name. Throwing if it does not
-        template <class HeuristicSet, std::size_t opt_i, std::size_t h_i>
+        template <class HeuristicsSet, std::size_t opt_i, std::size_t h_i>
         std::enable_if_t<h_i == HEURISTICS_COUNT - 1>
         addHeuristic() const {
-            if (!optionMatch<HeuristicSet, opt_i, h_i>())
+            if (!optionMatch<HeuristicsSet, opt_i, h_i>())
                 throw error::UnknownHeuristic { Options::heuristics.at(opt_i) };
         }
 
