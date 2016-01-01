@@ -1,33 +1,33 @@
-NAME			=	n-puzzle
+NAME            =   n-puzzle
 
-rwildcard		=	$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2)\
-					$(filter $(subst *,%,$2),$d))
+rwildcard       =   $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2)\
+                    $(filter $(subst *,%,$2),$d))
 
-COMPILER		=	clang++
+COMPILER        =   g++
 
-PCH				=	srcs/stdafx.hpp
-PCH_SUFFIX		=	.gch
-PCH_DIR			=	/tmp/pch_$(NAME)
-PCH_TARGET		=	$(PCH_DIR)$(PCH_SUFFIX)/pch
-PCH_FLAG		=	-include $(PCH_DIR)
-PCH_IGN_FLAGS	=	-Wno-deprecated-declarations -Wno-unused-parameter
+PCH             =   srcs/stdafx.hpp
+PCH_SUFFIX      =   .gch
+PCH_DIR         =   /tmp/pch_$(NAME)
+PCH_TARGET      =   $(PCH_DIR)$(PCH_SUFFIX)/pch
+PCH_FLAG        =   -include $(PCH_DIR)
+PCH_IGN_FLAGS   =   -Wno-deprecated-declarations -Wno-unused-parameter
 
-INCLUDE_DIRS	=	$(HOME)/.brew/Cellar/boost/1.58.0/include\
-					./srcs
-LIB_DIRS		=	$(HOME)/.brew/Cellar/boost/1.58.0/lib
-LIB_NAMES		=	boost_program_options
+INCLUDE_DIRS    =   $(BOOST_INCLUDE_DIR) ./srcs
+LIB_DIRS        =   $(BOOST_LIB_DIR)
+LIB_NAMES       =   boost_program_options
 
-CFLAGS			=	-Wall -Wextra -Werror -std=c++1y -O3\
-					$(foreach dir, $(INCLUDE_DIRS), -I $(dir))\
-					$(foreach define, $(PP_DEFINES), -D $(define))
-LFLAGS			=	$(foreach dir, $(LIB_DIRS), -L $(dir))\
-					$(foreach name, $(LIB_NAMES), -l$(name))
+CFLAGS          =   -Wall -Wextra -Werror -Wno-array-bounds -std=c++1y -O3\
+                    $(foreach dir, $(INCLUDE_DIRS), -I $(dir))\
+                    $(foreach define, $(PP_DEFINES), -D $(define))
+LFLAGS          =   -static\
+                    $(foreach dir, $(LIB_DIRS), -L $(dir))\
+                    $(foreach name, $(LIB_NAMES), -l $(name))
 
-OBJ_DIR			=	objs
-SRCS			=	$(call rwildcard, ./srcs, *.cpp)
-OBJS			=	$(addprefix $(OBJ_DIR)/, $(SRCS:.cpp=.o))
+OBJ_DIR         =   objs
+SRCS            =   $(call rwildcard, ./srcs, *.cpp)
+OBJS            =   $(addprefix $(OBJ_DIR)/, $(SRCS:.cpp=.o))
 
-OBJ_SUB_DIRS	=	$(dir $(OBJS))
+OBJ_SUB_DIRS    =   $(dir $(OBJS))
 
 all: show_fancy_name
 	@$(MAKE) $(NAME)
@@ -78,15 +78,15 @@ show_fancy_name:
 
 
 # ANSI helpers
-ansi			=	\033[$1m
+ansi            =   \033[$1m
 
-bold			=	$(call ansi,1)
-fg_color		=	$(call ansi,38;5;$1)
-reset			=	$(call ansi,0)
+bold            =   $(call ansi,1)
+fg_color        =   $(call ansi,38;5;$1)
+reset           =   $(call ansi,0)
 
-red				=	$(call fg_color,1)
-green			=	$(call fg_color,10)
-blue			=	$(call fg_color,27)
-cyan			=	$(call fg_color,6)
-yellow			=	$(call fg_color,11)
-white			=	$(call fg_color,255)
+red             =   $(call fg_color,1)
+green           =   $(call fg_color,10)
+blue            =   $(call fg_color,27)
+cyan            =   $(call fg_color,6)
+yellow          =   $(call fg_color,11)
+white           =   $(call fg_color,255)
