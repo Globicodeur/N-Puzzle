@@ -154,8 +154,6 @@ namespace algorithm {
         // -> iterating over the puzzle size (determined at runtime) to apply a
         // solving function with a static size (i.e. known at compile time)
         // This should allow some badass optimizations
-        // (BTW, fuck clang 3.6 for still not supporting non type template
-        // parameter packs)
         template <uint size, class F>
         std::enable_if_t<(size > MAX_PUZZLE_SIZE)>
         findAndApplyStaticSolver(uint runtimeSize, F) const {
