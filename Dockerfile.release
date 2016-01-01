@@ -1,0 +1,5 @@
+FROM scratch
+
+ADD ./n-puzzle /
+
+ENTRYPOINT ["/n-puzzle"]
