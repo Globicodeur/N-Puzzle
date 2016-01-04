@@ -1,16 +1,17 @@
 # N-Puzzle
-Solving games with path finding
+Solving games with path finding algorithms
 
 ### Trying it out
 With docker:
-```
-docker run --rm  globidocker/n-puzzle-release -s 4 --heuristics manhattan linear
+```sh
+docker run --rm  globidocker/n-puzzle --help
 ```
 
 ### Building
-`make`  
-:warning: This project only compiles with clang++ >= 3.6 (#cutting_edge_technos)  
-:warning: Compiling in non-debug mode can take a long time
+```sh
+docker build -t npuzzle-builder .
+docker run --rm -it -v $PWD:/app npuzzle-builder make -j$(nproc)
+```
 
 ### Usage
 ```
