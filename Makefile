@@ -10,13 +10,13 @@ PCH_SUFFIX      =   .gch
 PCH_DIR         =   /tmp/pch_$(NAME)
 PCH_TARGET      =   $(PCH_DIR)$(PCH_SUFFIX)/pch
 PCH_FLAG        =   -include $(PCH_DIR)
-PCH_IGN_FLAGS   =   -Wno-deprecated-declarations -Wno-unused-parameter
+PCH_IGN_FLAGS   =   -Wno-deprecated-declarations -Wno-unused-parameter -Wno-parentheses
 
 INCLUDE_DIRS    =   $(BOOST_INCLUDE_DIR) ./srcs
 LIB_DIRS        =   $(BOOST_LIB_DIR)
 LIB_NAMES       =   boost_program_options
 
-CFLAGS          =   -Wall -Wextra -Werror -Wno-array-bounds -std=c++1y -O3\
+CFLAGS          =   -Wall -Wextra -Werror -Wno-array-bounds -std=c++17 -O3\
                     $(foreach dir, $(INCLUDE_DIRS), -I $(dir))\
                     $(foreach define, $(PP_DEFINES), -D $(define))
 LFLAGS          =   -static\
