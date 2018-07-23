@@ -27,16 +27,14 @@ namespace algorithm {
             private:
 
                 template <uint idx>
-                std::enable_if_t<idx == 0, uint>
-                call(const Puzzle & puzzle) const {
-                    return std::get<idx>(heuristics)(puzzle);
-                }
+                auto call(const Puzzle & puzzle) const {
+                    auto heuristic = std::get<idx>(heuristics);
+                    auto heuristic_value = heuristic(puzzle);
 
-                template <uint idx>
-                std::enable_if_t<idx != 0, uint>
-                call(const Puzzle & puzzle) const {
-                    return std::get<idx>(heuristics)(puzzle) +
-                           call<idx - 1>(puzzle);
+                    if constexpr (idx == 0)
+                        return heuristic_value;
+                    else
+                        return heuristic_value + call<idx - 1>(puzzle);
                 }
 
                 std::tuple<Heuristics<size>...> heuristics;

@@ -100,45 +100,37 @@ namespace runtime {
         // Calls the heuristic endpoint if all the names are processed. Adds the
         // next heuristic otherwise
         template <class HeuristicsSet, std::size_t i>
-        std::enable_if_t<i <= HEURISTICS_COUNT>
-        solveWithHeuristics() const {
-            // Just in this scope to avoid cluttering
+        void solveWithHeuristics() const {
             using namespace boost::mpl;
-            // Sorting the heuristics to avoid irrelevant template instantiations
-            using HeuristicsTuple = typename tools::Sort<
-                HeuristicsSet,
-                std::tuple,
-                less<_1, _2>,
-                size<HeuristicsSet>::type::value
-            >::type;
 
-            if (i == Options::heuristics.size())
-                return solveWithStrategy(HeuristicsTuple { });
+            if constexpr (i > HEURISTICS_COUNT)
+                throw std::out_of_range { "Too many heuristics given" };
+            else {
+                // Sorting the heuristics to avoid irrelevant template instantiations
+                using HeuristicsTuple = typename tools::Sort<
+                    HeuristicsSet,
+                    std::tuple,
+                    less<_1, _2>,
+                    size<HeuristicsSet>::type::value
+                >::type;
 
-            addHeuristic<HeuristicsSet, i, 0>();
-        }
+                if (i == Options::heuristics.size())
+                    return solveWithStrategy(HeuristicsTuple { });
 
-        // Edge unrolling case
-        template <class HeuristicsSet, std::size_t i>
-        std::enable_if_t<(i > HEURISTICS_COUNT)>
-        solveWithHeuristics() const {
-            throw std::out_of_range { "Too many heuristics given" };
+                addHeuristic<HeuristicsSet, i, 0>();
+            }
         }
 
         // Trying to match the `h_i`-th heuristic name
         template <class HeuristicsSet, std::size_t opt_i, std::size_t h_i>
-        std::enable_if_t<h_i != HEURISTICS_COUNT - 1>
-        addHeuristic() const {
-            if (!optionMatch<HeuristicsSet, opt_i, h_i>())
-                addHeuristic<HeuristicsSet, opt_i, h_i + 1>();
-        }
-
-        // Trying to match the last heuristic name. Throwing if it does not
-        template <class HeuristicsSet, std::size_t opt_i, std::size_t h_i>
-        std::enable_if_t<h_i == HEURISTICS_COUNT - 1>
-        addHeuristic() const {
-            if (!optionMatch<HeuristicsSet, opt_i, h_i>())
-                throw error::UnknownHeuristic { Options::heuristics.at(opt_i) };
+        void addHeuristic() const {
+            if (!optionMatch<HeuristicsSet, opt_i, h_i>()) {
+                // Throwing if it does not match the last heuristic
+                if constexpr (h_i == HEURISTICS_COUNT - 1)
+                    throw error::UnknownHeuristic { Options::heuristics.at(opt_i) };
+                else
+                    addHeuristic<HeuristicsSet, opt_i, h_i + 1>();
+            }
         }
 
     };

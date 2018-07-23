@@ -155,20 +155,18 @@ namespace algorithm {
         // solving function with a static size (i.e. known at compile time)
         // This should allow some badass optimizations
         template <uint size, class F>
-        std::enable_if_t<(size > MAX_PUZZLE_SIZE)>
-        findAndApplyStaticSolver(uint runtimeSize, F) const {
-            throw error::PuzzleSizeTooLarge { runtimeSize };
+        void findAndApplyStaticSolver(uint runtimeSize, F onSolved) const {
+            if constexpr (size > MAX_PUZZLE_SIZE) {
+                (void)onSolved;
+                throw error::PuzzleSizeTooLarge { runtimeSize };
+            }
+            else {
+                if (runtimeSize == size)
+                    return solveParsed<size>(onSolved);
+
+                findAndApplyStaticSolver<size + 1>(runtimeSize, onSolved);
+            }
         }
-
-        template <uint size, class F>
-        std::enable_if_t<size <= MAX_PUZZLE_SIZE>
-        findAndApplyStaticSolver(uint runtimeSize, F onSolved) const {
-            if (runtimeSize == size)
-                return solveParsed<size>(onSolved);
-
-            findAndApplyStaticSolver<size + 1>(runtimeSize, onSolved);
-        }
-
     };
 
 }
