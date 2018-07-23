@@ -19,7 +19,7 @@ namespace runtime {
     // class can slow down compilation time by a lot!
     class Solver {
 
-        using MaybeState = boost::optional<parsing::ParsedPuzzle>;
+        using MaybeState = std::optional<parsing::ParsedPuzzle>;
 
     public:
 

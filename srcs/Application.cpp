@@ -11,7 +11,7 @@ Application::Application(int argc, char **argv) {
 }
 
 void Application::run(void) {
-    using MaybeState = boost::optional<parsing::ParsedPuzzle>;
+    using MaybeState = std::optional<parsing::ParsedPuzzle>;
 
     parsing::Parser parser;
     MaybeState initial, goal;

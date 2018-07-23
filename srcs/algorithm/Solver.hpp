@@ -18,7 +18,7 @@ namespace algorithm {
     template <HClass Heuristic, bool uniform, bool ida>
     class Solver {
 
-        using MaybeState = boost::optional<parsing::ParsedPuzzle>;
+        using MaybeState = std::optional<parsing::ParsedPuzzle>;
 
     public:
 
