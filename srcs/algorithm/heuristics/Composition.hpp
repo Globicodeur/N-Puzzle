@@ -21,16 +21,16 @@ namespace algorithm {
                 { }
 
                 auto operator()(const Puzzle & puzzle) const {
-                    auto add_heuristic_cost = [&](auto cost, auto heuristic) {
-                        return cost + heuristic(puzzle);
+                    auto sum_heuristics = [&](auto... heuristics) {
+                        return (heuristics(puzzle) + ...);
                     };
 
-                    return hana::fold(heuristics, 0, add_heuristic_cost);
+                    return std::apply(sum_heuristics, heuristics);
                 }
 
             private:
 
-                hana::tuple<Heuristics<size>...> heuristics;
+                std::tuple<Heuristics<size>...> heuristics;
 
             };
 
