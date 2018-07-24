@@ -23,10 +23,10 @@ namespace algorithm {
 
     public:
 
-        Solver(const MaybeState & initial, const MaybeState & goal):
+        Solver(MaybeState initial, MaybeState goal):
             initial { initial },
-            goal    { goal } {
-
+            goal    { goal }
+        {
             if (initial)
                 modelState = *initial;
             else if (goal)
