@@ -40,4 +40,23 @@ namespace tools {
 
     };
 
+    template <class N, N n, N up_to, class F>
+    constexpr auto reify_range_impl(N rn, F f) {
+        if constexpr (n > up_to) {
+            (void)rn; (void)f;
+            throw std::out_of_range { "value to reify is not in the range" };
+        }
+        else {
+            if (n == rn) return f(hana::integral_c<N, n>);
+            else         return reify_range_impl<N, n + 1, up_to>(rn, f);
+        }
+    }
+
+    template <auto from, auto up_to, class N>
+    constexpr auto reify_range(N n) {
+        return [=](auto f) {
+            return reify_range_impl<N, from, up_to>(n, f);
+        };
+    }
+
 }

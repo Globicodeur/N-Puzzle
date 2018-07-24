@@ -12,6 +12,7 @@
 
 #include "tools/Benchmark.hpp"
 #include "tools/ansi.hpp"
+#include "tools/type_traits.hpp"
 
 namespace algorithm {
 
@@ -51,7 +52,14 @@ namespace algorithm {
                 }
             }();
 
-            findAndApplyStaticSolver<1>(puzzle_size, onSolved);
+            try {
+                tools::reify_range<1, MAX_PUZZLE_SIZE>(puzzle_size)(
+                    [=](auto size) { this->solveParsed<size>(onSolved); }
+                );
+            }
+            catch (std::out_of_range &) {
+                throw error::PuzzleSizeTooLarge { puzzle_size };
+            }
         }
 
     private:
@@ -152,24 +160,6 @@ namespace algorithm {
             }
 
             solve(start, end, onSolved);
-        }
-
-        // Runtime value unrolling
-        // -> iterating over the puzzle size (determined at runtime) to apply a
-        // solving function with a static size (i.e. known at compile time)
-        // This should allow some badass optimizations
-        template <uint size, class F>
-        void findAndApplyStaticSolver(uint runtimeSize, F onSolved) const {
-            if constexpr (size > MAX_PUZZLE_SIZE) {
-                (void)onSolved;
-                throw error::PuzzleSizeTooLarge { runtimeSize };
-            }
-            else {
-                if (runtimeSize == size)
-                    return solveParsed<size>(onSolved);
-
-                findAndApplyStaticSolver<size + 1>(runtimeSize, onSolved);
-            }
         }
     };
 
