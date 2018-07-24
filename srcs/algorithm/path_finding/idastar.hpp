@@ -60,7 +60,7 @@ namespace algorithm {
                 openSet.pop();
                 for (const auto & neighbor: neighbors) {
                     auto newCost = h(neighbor);
-                    if (uniform) // should be statically optimized
+                    if constexpr (uniform)
                         newCost += newDistance;
 
                     NodeT neighborNode {
