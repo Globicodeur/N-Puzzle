@@ -34,20 +34,24 @@ namespace algorithm {
 
         template <class F>
         void solve(F onSolved) const {
-            // Generate both
-            if (!initial && !goal) {
-                if (Options::generationSize == 0)
-                    throw error::ZeroGeneration { };
+            auto puzzle_size = [=]() -> uint {
+                // Generate both
+                if (!initial && !goal) {
+                    if (Options::generationSize == 0)
+                        throw error::ZeroGeneration { };
 
-                findAndApplyStaticSolver<1>(Options::generationSize, onSolved);
-            }
-            // Or use the model
-            else {
-                if (modelState.size() == 0)
-                    throw error::EmptyPuzzle { };
+                    return Options::generationSize;
+                }
+                // Or use the model
+                else {
+                    if (modelState.size() == 0)
+                        throw error::EmptyPuzzle { };
 
-                findAndApplyStaticSolver<1>(modelState.size(), onSolved);
-            }
+                    return modelState.size();
+                }
+            }();
+
+            findAndApplyStaticSolver<1>(puzzle_size, onSolved);
         }
 
     private:
