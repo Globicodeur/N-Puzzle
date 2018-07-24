@@ -18,7 +18,7 @@ std::vector<std::string>    Options::heuristics     { "manhattan" };
 std::string                 Options::searchStrategy { "uniform" };
 std::string                 Options::astarVariant   { "astar" };
 bool                        Options::randomGoal     { false };
-uint                        Options::generationSize { 3 };
+PuzzleSize                  Options::generationSize { 3 };
 bool                        Options::showMoves      { false };
 Options::seed_t             Options::randomSeed     { getRandomSeed() };
 

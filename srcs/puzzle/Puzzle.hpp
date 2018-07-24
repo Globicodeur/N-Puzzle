@@ -2,7 +2,7 @@
 
 namespace puzzle {
 
-    template <uint size>
+    template <PuzzleSize size>
     class Puzzle {
 
         using GridUnit = unsigned char; // Allows up to 255-puzzle (16x16) on

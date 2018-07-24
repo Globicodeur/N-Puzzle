@@ -9,7 +9,7 @@ namespace algorithm {
         template <HClass... Heuristics>
         struct Composition {
 
-            template <uint size>
+            template <PuzzleSize size>
             class Composer {
 
                 using Puzzle = puzzle::Puzzle<size>;

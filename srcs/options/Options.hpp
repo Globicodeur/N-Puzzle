@@ -10,7 +10,7 @@ struct Options {
     static std::string              searchStrategy;
     static std::string              astarVariant;
     static bool                     randomGoal;
-    static uint                     generationSize;
+    static PuzzleSize               generationSize;
     static bool                     showMoves;
     static seed_t                   randomSeed;
 

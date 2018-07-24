@@ -9,7 +9,7 @@ namespace puzzle {
     // Puzzle hashing helper
     struct PuzzleHasher {
 
-        template <uint size>
+        template <PuzzleSize size>
         auto operator()(const Puzzle<size> & puzzle) const {
             return boost::hash_range(
                 puzzle.grid,
@@ -20,15 +20,15 @@ namespace puzzle {
     };
 
     // Puzzle ostream overload
-    template <uint size>
+    template <PuzzleSize size>
     std::ostream & operator<<(std::ostream & os, const Puzzle<size> & puzzle) {
         static const int width = std::floor(std::log10(size * size - 1)) + 1;
 
-        for (uint y = 0; y < size; ++y) {
+        for (PuzzleSize y = 0; y < size; ++y) {
             os << '|';
-            for (uint x = 0; x < size; ++x)
+            for (PuzzleSize x = 0; x < size; ++x)
                 os  << std::setw(width) << std::left
-                    << static_cast<uint>(puzzle.grid[y * size + x])
+                    << static_cast<uint32_t>(puzzle.grid[y * size + x])
                     << " |";
             os << std::endl;
         }
@@ -36,19 +36,19 @@ namespace puzzle {
     }
 
     // Builds a puzzle of known size from nested vectors of values
-    template <uint size>
+    template <PuzzleSize size>
     auto buildStaticPuzzle(const parsing::ParsedPuzzle & parsed) {
         puzzle::Puzzle<size> puzzle;
 
-        for (uint y = 0; y < size; ++y)
-            for (uint x = 0; x < size; ++x)
+        for (PuzzleSize y = 0; y < size; ++y)
+            for (PuzzleSize x = 0; x < size; ++x)
                 puzzle.grid[y * size + x] = parsed.at(y).at(x);
 
         return puzzle;
     }
 
     // Builds a 'snail' puzzle like the ones in the subject
-    template <uint size>
+    template <PuzzleSize size>
     auto makeSnail(void) {
         struct Position { int x, y; };
         static const Position DELTAS[] = {
@@ -57,11 +57,11 @@ namespace puzzle {
 
         Puzzle<size> puzzle;
         Position pos { -1, 0 };
-        uint xMoves = size;
-        uint yMoves = size - 1;
-        uint value = 1;
-        uint deltaIdx = 0;
-        uint moved = 0;
+        PuzzleSize xMoves = size;
+        PuzzleSize yMoves = size - 1;
+        uint32_t value = 1;
+        uint32_t deltaIdx = 0;
+        uint32_t moved = 0;
 
         while (xMoves || yMoves) {
             Position delta = DELTAS[deltaIdx % 4];
@@ -76,7 +76,7 @@ namespace puzzle {
     }
 
     // Finds immediate neighbors for a given puzzle
-    template <uint size>
+    template <PuzzleSize size>
     auto neighbors(const Puzzle<size> & puzzle) {
         std::vector<Puzzle<size>> neighbors;
         neighbors.reserve(4);
@@ -97,14 +97,14 @@ namespace puzzle {
     }
 
     // Computes the number of inversions for a given puzzle
-    template <uint size>
+    template <PuzzleSize size>
     auto inversions(const Puzzle<size> & puzzle) {
-        uint count = 0;
+        PuzzleSize count = 0;
 
-        for (uint i = 0; i < size * size - 1; ++i) {
+        for (PuzzleSize i = 0; i < size * size - 1; ++i) {
             if (puzzle.grid[i] == 0)
                 continue ;
-            for (uint j = i + 1; j < size * size; ++j) {
+            for (PuzzleSize j = i + 1; j < size * size; ++j) {
                 if (puzzle.grid[j] == 0)
                     continue ;
                 count += (puzzle.grid[j] < puzzle.grid[i]);
@@ -115,7 +115,7 @@ namespace puzzle {
     }
 
     // Returns true if `start` belongs to the same permutation group as `goal`
-    template <uint size>
+    template <PuzzleSize size>
     bool isSolvable(const Puzzle<size> & start, const Puzzle<size> & goal) {
         auto startInversions = inversions(start);
         auto goalInversions = inversions(goal);
@@ -129,7 +129,7 @@ namespace puzzle {
     }
 
     // Returns a random puzzle
-    template <uint size>
+    template <PuzzleSize size>
     auto generate() {
         static std::mt19937 engine { Options::randomSeed };
 
@@ -151,7 +151,7 @@ namespace puzzle {
     }
 
     // Returns a random puzzle that is solvable for the given puzzle
-    template <uint size>
+    template <PuzzleSize size>
     auto generateMatch(const Puzzle<size> & match) {
         Puzzle<size> puzzle;
 

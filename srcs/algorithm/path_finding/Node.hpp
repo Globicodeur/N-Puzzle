@@ -10,8 +10,8 @@ namespace algorithm {
 
         Node(
             const Data & data,
-            uint distance,
-            uint cost,
+            uint32_t distance,
+            uint32_t cost,
             const Node * previous
         ):
             data        (data),
@@ -38,8 +38,8 @@ namespace algorithm {
         };
 
         Data        data;
-        uint        distance; // g
-        uint        cost;     // f
+        uint32_t    distance; // g
+        uint32_t    cost;     // f
         const Node  *previous;
         std::size_t hash;
     };

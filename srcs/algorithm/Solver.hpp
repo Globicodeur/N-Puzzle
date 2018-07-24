@@ -35,7 +35,7 @@ namespace algorithm {
 
         template <class F>
         void solve(F onSolved) const {
-            auto puzzle_size = [=]() -> uint {
+            auto puzzle_size = [=]() -> PuzzleSize {
                 // Generate both
                 if (!initial && !goal) {
                     if (Options::generationSize == 0)
@@ -68,7 +68,7 @@ namespace algorithm {
         parsing::ParsedPuzzle modelState;
 
         // This is the solver endpoint
-        template <uint size, class F>
+        template <PuzzleSize size, class F>
         void solve(Puzzle<size> start, Puzzle<size> end, F onSolved) const {
             std::cout << "==============\n\n";
             std::cout << "Initial state:\n\n"
@@ -129,7 +129,7 @@ namespace algorithm {
 
         // Calls the endpoint with static puzzles generated from either parsed
         // puzzles or a random generator
-        template <uint size, class F>
+        template <PuzzleSize size, class F>
         void solveParsed(F onSolved) const {
             Puzzle<size> start, end;
 

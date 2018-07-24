@@ -8,7 +8,7 @@
 
 namespace puzzle {
 
-    template <uint size>
+    template <PuzzleSize size>
     struct Solution: public std::vector<Puzzle<size>> {
 
         Solution(std::size_t timeComplexity, std::size_t spaceComplexity):

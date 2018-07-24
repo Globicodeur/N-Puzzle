@@ -7,7 +7,7 @@ namespace algorithm {
 
     using puzzle::Puzzle;
 
-    template <HClass H, bool uniform, uint size>
+    template <HClass H, bool uniform, PuzzleSize size>
     auto idastar(const Puzzle<size> & start, const Puzzle<size> & goal) {
         // Type aliases
         using NodeT = Node<Puzzle<size>>;
@@ -25,12 +25,12 @@ namespace algorithm {
         std::size_t statesInMemory = 0;
         std::size_t maxStatesInMemory = 0;
 
-        uint nextTreshold = h(start);
-        uint treshold = std::numeric_limits<uint>::max();
+        uint32_t nextTreshold = h(start);
+        uint32_t treshold = std::numeric_limits<uint32_t>::max();
 
         while (treshold != nextTreshold) {
             treshold = nextTreshold;
-            nextTreshold = std::numeric_limits<uint>::max();
+            nextTreshold = std::numeric_limits<uint32_t>::max();
 
             maxStatesInMemory = std::max(maxStatesInMemory, statesInMemory);
             statesInMemory = 1;

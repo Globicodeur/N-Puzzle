@@ -15,7 +15,7 @@ namespace algorithm {
         template <HClass H, const char * n, size_t id>
         struct Trait: boost::mpl::size_t<id> {
 
-            template <uint s>
+            template <PuzzleSize s>
             using heuristic = H<s>;
 
             static constexpr const char * name = n;

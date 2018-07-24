@@ -21,7 +21,7 @@ namespace parsing {
             // Useful rule for ignoring crap
             noise = *(comment | eol);
 
-            auto validateNumber = [this](Row & storage, uint number) {
+            auto validateNumber = [this](Row & storage, uint32_t number) {
                 // Not in range
                 if (number >= size * size)
                     return false;
@@ -61,8 +61,8 @@ namespace parsing {
         rule<It, Row(), blank_type>             row;
         rule<It, ParsedPuzzle(), blank_type>    puzzle;
 
-        uint                                    size;
-        std::unordered_set<uint>                parsed;
+        PuzzleSize                              size;
+        std::unordered_set<uint32_t>            parsed;
     };
 
 }

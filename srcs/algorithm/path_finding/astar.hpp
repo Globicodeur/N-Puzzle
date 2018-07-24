@@ -7,7 +7,7 @@ namespace algorithm {
 
     using puzzle::Puzzle;
 
-    template <HClass H, bool uniform, uint size>
+    template <HClass H, bool uniform, PuzzleSize size>
     auto astar(const Puzzle<size> & start, const Puzzle<size> & goal) {
         // Type aliases
         using NodeT = Node<Puzzle<size>>;

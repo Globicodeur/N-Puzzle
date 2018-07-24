@@ -6,7 +6,7 @@
 
 namespace algorithm {
 
-    template <uint size>
+    template <PuzzleSize size>
     auto backtrack(std::size_t iterations, std::size_t visitedCount,
                    const Node<puzzle::Puzzle<size>> & lastNode) {
         puzzle::Solution<size> solution { iterations, visitedCount };

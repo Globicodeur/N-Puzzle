@@ -6,11 +6,11 @@ namespace algorithm {
 
     namespace heuristics {
 
-        template <uint size>
+        template <PuzzleSize size>
         struct Gaschnig {
 
             Gaschnig(const puzzle::Puzzle<size> & goal) {
-                for (uint i = 0; i < size * size; ++i) {
+                for (PuzzleSize i = 0; i < size * size; ++i) {
                     indexes[goal.grid[i]] = i;
                     values[i] = goal.grid[i];
                 }

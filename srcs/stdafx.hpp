@@ -32,6 +32,8 @@ namespace qi = boost::spirit::qi;
 
 namespace hana = boost::hana;
 
+using PuzzleSize = uint32_t;
+
 // Macros
 #define Constant static const auto
-#define HClass template <uint> class
+#define HClass template <PuzzleSize> class
