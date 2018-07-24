@@ -21,12 +21,16 @@
 
 #include <boost/mpl/set.hpp>
 
+#include <boost/hana.hpp>
+
 // Aliases
 namespace po = boost::program_options;
 
 namespace phoenix = boost::phoenix;
 namespace spirit = boost::spirit;
 namespace qi = boost::spirit::qi;
+
+namespace hana = boost::hana;
 
 // Macros
 #define Constant static const auto

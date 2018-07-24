@@ -20,24 +20,17 @@ namespace algorithm {
                     heuristics { Heuristics<size> { goal } ... }
                 { }
 
-                uint operator()(const Puzzle & puzzle) const {
-                    return call<sizeof...(Heuristics) - 1>(puzzle);
+                auto operator()(const Puzzle & puzzle) const {
+                    auto add_heuristic_cost = [&](auto cost, auto heuristic) {
+                        return cost + heuristic(puzzle);
+                    };
+
+                    return hana::fold(heuristics, 0, add_heuristic_cost);
                 }
 
             private:
 
-                template <uint idx>
-                auto call(const Puzzle & puzzle) const {
-                    auto heuristic = std::get<idx>(heuristics);
-                    auto heuristic_value = heuristic(puzzle);
-
-                    if constexpr (idx == 0)
-                        return heuristic_value;
-                    else
-                        return heuristic_value + call<idx - 1>(puzzle);
-                }
-
-                std::tuple<Heuristics<size>...> heuristics;
+                hana::tuple<Heuristics<size>...> heuristics;
 
             };
 
